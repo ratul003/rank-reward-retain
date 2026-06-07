@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rank, Reward, Retain
 
-## Getting Started
+**Portfolio Project 6** — Expert scoring, compensation design, and retention framework built for [Coto](https://coto.world) (Singapore, 2024).
 
-First, run the development server:
+> Coto had experts but no intelligence about them. I built the full supply intelligence layer from scratch: a TOPSIS scoring system, a dynamic revenue framework, and a creator analytics dashboard — all delivered before the engineering team had capacity to ship anything.
+
+**Live demo:** https://rank-reward-retain.vercel.app  
+**Companion project (P5):** https://when-demand-exceeds-supply.vercel.app
+
+---
+
+## The Three Arcs
+
+### Rank — TOPSIS Expert Readiness Score (ERS)
+
+Multi-criteria decision analysis ranking every expert 0–1 against five criteria:
+
+| Criterion       | Type    | Weight |
+|----------------|---------|--------|
+| CSAT            | Benefit | 0.30   |
+| Session Count   | Benefit | 0.25   |
+| Retention Rate  | Benefit | 0.20   |
+| Response Time   | Cost    | 0.15   |
+| Credential Tier | Benefit | 0.10   |
+
+**Why TOPSIS, not a weighted average:** A weighted average is gameable — inflate session count while CSAT drops and the score stays flat. TOPSIS evaluates each expert against both the ideal and anti-ideal profile simultaneously. Per-criterion breakdown always returned, fully interpretable.
+
+**Algorithm:** Euclidean normalisation → weighted matrix → positive/negative ideal → separation distances → relative closeness (ERS).
+
+### Reward — Dynamic Revenue Optimization Framework
+
+Base 30–90%, with seven additive multipliers:
+
+| Factor                        | Multiplier |
+|-------------------------------|-----------|
+| Legal / Finance category      | +20%      |
+| Mental Health / Relationship  | +15%      |
+| MENA or SEA region            | +10%      |
+| Late night (11pm–4am)         | +15%      |
+| 30+ sessions in 90 days       | +10%      |
+| Certification within 4 months | +15%      |
+| Exclusive contract (3 months) | +25%      |
+| Performance milestone         | +5%       |
+
+**Worked example:** Indian mental health expert, MENA users, late night, exclusive contract = 70% revenue share. Built into the number, not an ops team's Slack message.
+
+**Early Bird Packages:** Nine launch packages with 90% revenue share guaranteed for 18 months, designed to bring supply online ahead of demand.
+
+### Retain — Creator Analytics Framework
+
+48 metrics across four modules, all with WoW and MoM deltas:
+
+- **Performance (8 metrics):** Followers, sessions, reshares, reviews, likes, love reacts, views, paid customers
+- **Sessions (13 metrics):** Attendees, comments, polls, returning viewers, session time, no shows, dropout, utilization, retention rate, CSAT, creator waiting time
+- **Revenue (17 metrics):** Earnings, ARPU, LTV, churn/refund, upsell/cross-sell, LTV-to-CAC, freemium conversion
+- **Conversion Funnel (10 metrics):** Download → Sign-up → Session → Transaction, with churn attribution at Expert Reviews, Expert Unavailability, and Payment Page stages
+
+Delivered as a working Google Sheets dashboard (3 tabs) before any analytics engineering was in place.
+
+---
+
+## ERS → AI Training Pipeline
+
+The ERS score became the quality gate for Joy's training data:
+
+- ERS ≥ 0.65 (expert quality threshold)
+- Session health ≥ 0.60 (resolution + sentiment arc composite)
+- Minimum 5 exchanges per conversation
+- Positive customer sentiment arc
+
+49.6% pass rate, by design. 248 high-quality pairs beat 500 mediocre ones. Joy (Coto's AI companion trained on 3M+ consultations) reflects this filtering.
+
+### Conversation Intelligence signals extracted per session
+
+| Signal              | Method                          |
+|--------------------|---------------------------------|
+| Topic classification| Zero-shot classification        |
+| Sentiment arc       | Rolling VADER                   |
+| Urgency score       | Keyword + embedding classifier  |
+| Resolution quality  | Conversation-end sentiment      |
+| Expertise signal    | Domain perplexity scoring       |
+| Session health      | Weighted composite              |
+
+Output: OpenAI fine-tuning JSONL, HuggingFace datasets, Axolotl / LLaMA-Factory compatible.
+
+---
+
+## Analytics Scripts
+
+| Script | Description |
+|--------|-------------|
+| `analytics/topsis_ers_calculator.py` | Full TOPSIS algorithm, configurable per preset (Coto wellness, telehealth, tutoring) |
+| `analytics/revenue_share_model.py` | Multi-factor revenue share calculator with cohort simulation |
+| `analytics/creator_analytics.py` | Creator performance, session, and conversion funnel metrics with WoW/MoM deltas |
+| `analytics/ai_pipeline.py` | Conversation intelligence, ERS quality gate, fine-tuning dataset builder |
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pip install numpy pandas scipy
+python analytics/topsis_ers_calculator.py
+python analytics/revenue_share_model.py
+python analytics/creator_analytics.py
+python analytics/ai_pipeline.py
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Outcomes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **23%** increase in expert quality ratings after TOPSIS scoring implementation
+- **95%** supply retention from the dynamic revenue optimization framework
+- **300+** verified experts onboarded across 5 wellness categories
+- **3M+** consultations now served via Joy AI, trained on quality-gated expert conversations
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Scoring:** Python 3.11, NumPy, SciPy, Pandas, TOPSIS from scratch  
+**Analytics:** dbt (staging + marts), PostgreSQL schema, Segment-compatible event spec  
+**AI Pipeline:** Zero-shot NLP, VADER sentiment, PII anonymisation, JSONL output  
+**Portfolio Page:** Next.js 16, React, TypeScript — inline SVG charts, no charting libraries
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Related
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Project 5: When Demand Exceeds Supply](https://github.com/ratul003/when-demand-exceeds-supply) — real-time demand-supply intelligence system (P5)
+- [Portfolio](https://wahidtratul.com) — full project index
