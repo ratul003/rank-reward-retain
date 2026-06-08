@@ -289,7 +289,7 @@ function ERSScorecard() {
           </button>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${VIOLET}18`, border: `2px solid ${VIOLET}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800, color: VIOLET }}>
@@ -426,7 +426,7 @@ function RevenueShareBuilder() {
           <div style={{ height: '100%', width: `${total * 100}%`, background: `linear-gradient(90deg, ${VIOLET}, #06b6d4)`, borderRadius: 6, transition: 'width 0.35s' }} />
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
         {[10, 20, 40].map(s => (
           <div key={s} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '12px 14px' }}>
             <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>{s} sessions/mo</div>
@@ -635,7 +635,7 @@ function WeightedAvgVsTopsis() {
       <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.65, marginBottom: 24, maxWidth: 680 }}>
         Same five experts. Same weights. Two methods. The rankings diverge, and that gap is where platform quality either compounds or quietly decays.
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
         <div>
           <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 14 }}>Naive Weighted Average</div>
           {waRanked.map((e, rank) => (
@@ -680,7 +680,7 @@ function WeightedAvgVsTopsis() {
           </div>
         </div>
       </div>
-      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
         {[
           { expert: 'Zara K.',   wa: zaraWA + 1,  top: zaraTopsis + 1, dir: 'down', note: 'High volume hid low quality' },
           { expert: 'Amir H.',  wa: amirWA + 1,  top: amirTopsis + 1, dir: 'up',   note: 'Depth rewarded over volume' },
@@ -738,7 +738,7 @@ function LiveERSSimulator() {
       <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: 24, maxWidth: 640 }}>
         If you were adapting this for your own platform - telehealth, tutoring, freelance - this is where you would start. Drag the sliders to profile a hypothetical expert. The TOPSIS engine runs against the pool in real time.
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
         <div>
           {sliders.map((s, i) => (
             <div key={s.label} style={{ marginBottom: 18 }}>
@@ -967,7 +967,7 @@ function IndustryAdapter() {
           }}>{p.icon} {p.label}</button>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
         <div>
           <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>Criterion weights</div>
           {CRITERIA.map((c, i) => (
@@ -1107,6 +1107,175 @@ function ExpertScatterPlot() {
   )
 }
 
+// ── TopsisFormulas ──────────────────────────────────────────────────────────────
+function TopsisFormulas() {
+  const [step, setStep] = useState(0)
+  const { R, V, Apos, Aneg, dPos, dNeg, ers } = computeTopsis(SAMPLE_EXPERTS)
+  const e0 = SAMPLE_EXPERTS[0]
+
+  const raw = SAMPLE_EXPERTS.map(e => [e.csat, e.sessions, e.retention, e.responseTime, e.credTier])
+  const colNorms = [0,1,2,3,4].map(j => Math.sqrt(raw.reduce((s, r) => s + r[j] ** 2, 0)))
+
+  const STEPS = [
+    {
+      id: 'norm',
+      label: '1  Normalize',
+      formula: 'rij = xij / sqrt(sum xij^2)',
+      note: 'Euclidean normalization removes unit differences. CSAT (1-5) and sessions (0-300) become dimensionless and comparable.',
+      calc: `CSAT column norm = sqrt(${raw.map(r => r[0].toFixed(1) + '²').join(' + ')})`,
+      calcVal: `= sqrt(${raw.reduce((s,r) => s+r[0]**2,0).toFixed(2)}) = ${colNorms[0].toFixed(4)}`,
+      result: `Arjun CSAT normalized: ${e0.csat} / ${colNorms[0].toFixed(4)} = ${R[0][0].toFixed(4)}`,
+    },
+    {
+      id: 'weight',
+      label: '2  Weight',
+      formula: 'vij = wj x rij',
+      note: 'Multiply each normalized score by its criterion weight. CSAT weight = 0.30 contributes 3x more than Credential Tier (0.10).',
+      calc: `Arjun CSAT: 0.30 x ${R[0][0].toFixed(4)}`,
+      calcVal: `= ${V[0][0].toFixed(4)}`,
+      result: `5 weighted values for Arjun: [${V[0].map(v => v.toFixed(4)).join(', ')}]`,
+    },
+    {
+      id: 'ideal',
+      label: '3  Ideal',
+      formula: 'A+ = max(vij) for benefit  |  min(vij) for cost',
+      note: 'Positive ideal A+ is the best value per criterion across all experts. Response Time flips — lower is better (cost criterion).',
+      calc: `CSAT column values: [${V.map(r => r[0].toFixed(4)).join(', ')}]`,
+      calcVal: `A+ (CSAT) = max = ${Apos[0].toFixed(4)}  |  A+ (Resp. Time) = min = ${Apos[3].toFixed(4)}`,
+      result: `A+ = [${Apos.map(v => v.toFixed(4)).join(', ')}]`,
+    },
+    {
+      id: 'dist',
+      label: '4  Distance',
+      formula: 'd+ = sqrt(sum(vij - a+j)^2)  |  d- = sqrt(sum(vij - a-j)^2)',
+      note: 'Euclidean distance from the positive ideal (d+) and negative ideal (d-). Closer to A+ and farther from A- = better expert.',
+      calc: `Arjun d+ = sqrt(sum of squared gaps to A+)`,
+      calcVal: `= ${dPos[0].toFixed(4)}    |    d- = ${dNeg[0].toFixed(4)}`,
+      result: `Arjun is ${dPos[0].toFixed(4)} from the ideal and ${dNeg[0].toFixed(4)} from the worst`,
+    },
+    {
+      id: 'ers',
+      label: '5  ERS Score',
+      formula: 'ERS(i) = d-(i) / (d+(i) + d-(i))',
+      note: 'Relative closeness. ERS = 1.0 means perfect on all criteria simultaneously. Threshold 0.65 gates AI training eligibility.',
+      calc: `Arjun ERS = ${dNeg[0].toFixed(4)} / (${dPos[0].toFixed(4)} + ${dNeg[0].toFixed(4)})`,
+      calcVal: `= ${dNeg[0].toFixed(4)} / ${(dPos[0]+dNeg[0]).toFixed(4)} = ${ers[0].toFixed(4)}`,
+      result: `ERS ${ers[0].toFixed(4)} ${ers[0] >= 0.65 ? '>= 0.65: AI training eligible' : '< 0.65: below threshold'}`,
+    },
+  ]
+
+  const s = STEPS[step]
+
+  return (
+    <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 16 }}>
+        TOPSIS math · formula + worked example using Arjun S.
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
+        {STEPS.map((st, i) => (
+          <button key={st.id} onClick={() => setStep(i)} style={{
+            padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600,
+            border: `2px solid ${step === i ? VIOLET : 'rgba(255,255,255,0.08)'}`,
+            background: step === i ? `${VIOLET}18` : 'rgba(255,255,255,0.02)',
+            color: step === i ? VIOLET : '#64748b', transition: 'all 0.15s',
+          }}>{st.label}</button>
+        ))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 16 }}>
+        <div style={{ padding: '18px 20px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}20`, borderRadius: 12 }}>
+          <div style={{ fontSize: '0.6rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Formula</div>
+          <div style={{ fontFamily: 'monospace', fontSize: '1.05rem', color: '#e2e8f0', marginBottom: 12, lineHeight: 1.5 }}>{s.formula}</div>
+          <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.65, margin: 0 }}>{s.note}</p>
+        </div>
+        <div style={{ padding: '18px 20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
+          <div style={{ fontSize: '0.6rem', color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+            Worked: Arjun S. (csat 4.8, sessions 142, retention 73%, resp 4.2m, cred T3)
+          </div>
+          <div style={{ fontFamily: 'monospace', fontSize: '0.79rem', color: '#64748b', lineHeight: 1.9 }}>
+            <div>{s.calc}</div>
+            <div style={{ color: '#94a3b8' }}>{s.calcVal}</div>
+            <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)', color: VIOLET, fontWeight: 700, fontSize: '0.82rem' }}>
+              {s.result}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── ERSBarChart ─────────────────────────────────────────────────────────────────
+function ERSBarChart() {
+  const [hov, setHov] = useState<number | null>(null)
+  const { ers, order } = computeTopsis(SAMPLE_EXPERTS)
+  const ranked = order.map(o => ({ ...SAMPLE_EXPERTS[o.i], ers: o.s }))
+
+  const BAR_W = 44, GAP = 20, MAX_H = 160, PAD_L = 48, PAD_B = 48, PAD_T = 32
+  const svgW = PAD_L + ranked.length * (BAR_W + GAP) + GAP + 10
+  const svgH = MAX_H + PAD_B + PAD_T
+
+  return (
+    <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>
+        ERS scores · all 5 experts, AI threshold at 0.65
+      </div>
+      <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5, marginBottom: 20, maxWidth: 560 }}>
+        Purple bars pass the AI training gate (ERS &ge; 0.65). Red bars fall below. Hover to inspect. Notice Nadia ranks last despite 178 sessions — CSAT 3.4 and 44% retention make her the worst overall profile.
+      </p>
+      <svg width={svgW} height={svgH} style={{ overflow: 'visible', fontFamily: 'inherit' }}>
+        {/* Y gridlines */}
+        {[0, 0.25, 0.5, 0.65, 0.75, 1.0].map(v => {
+          const y = PAD_T + MAX_H - v * MAX_H
+          const isThreshold = v === 0.65
+          return (
+            <g key={v}>
+              <line x1={PAD_L} y1={y} x2={svgW - 10} y2={y}
+                stroke={isThreshold ? '#f59e0b' : 'rgba(255,255,255,0.05)'}
+                strokeWidth={isThreshold ? 1.5 : 1}
+                strokeDasharray={isThreshold ? '5 3' : undefined} />
+              {isThreshold && (
+                <text x={PAD_L + 4} y={y - 5} fill="#f59e0b" fontSize="9">AI gate 0.65</text>
+              )}
+              <text x={PAD_L - 6} y={y + 3} textAnchor="end" fill="#475569" fontSize="9">{v.toFixed(2)}</text>
+            </g>
+          )
+        })}
+        {/* Y axis */}
+        <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={PAD_T + MAX_H} stroke="#334155" strokeWidth="1.5" />
+
+        {/* Bars */}
+        {ranked.map((e, i) => {
+          const x = PAD_L + GAP + i * (BAR_W + GAP)
+          const barH = e.ers * MAX_H
+          const y = PAD_T + MAX_H - barH
+          const isHov = hov === i
+          const color = e.ers >= 0.65 ? VIOLET : '#ef4444'
+          return (
+            <g key={e.name} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)} style={{ cursor: 'pointer' }}>
+              <rect x={x} y={y} width={BAR_W} height={barH}
+                rx={5} fill={isHov ? color : `${color}70`}
+                style={{ transition: 'fill 0.15s' }} />
+              <text x={x + BAR_W / 2} y={y - 6} textAnchor="middle"
+                fill={color} fontSize="10" fontWeight="700">{e.ers.toFixed(3)}</text>
+              <text x={x + BAR_W / 2} y={PAD_T + MAX_H + 16} textAnchor="middle"
+                fill={isHov ? '#e2e8f0' : '#64748b'} fontSize="9">{e.name.split(' ')[0]}</text>
+              <text x={x + BAR_W / 2} y={PAD_T + MAX_H + 28} textAnchor="middle"
+                fill="#334155" fontSize="8">#{i + 1}</text>
+            </g>
+          )
+        })}
+      </svg>
+      {hov !== null && (
+        <div style={{ marginTop: 10, padding: '10px 16px', background: `${ranked[hov].ers >= 0.65 ? VIOLET : '#ef4444'}08`, border: `1px solid ${ranked[hov].ers >= 0.65 ? VIOLET : '#ef4444'}25`, borderRadius: 8, fontSize: '0.78rem', color: '#94a3b8' }}>
+          <span style={{ color: ranked[hov].ers >= 0.65 ? VIOLET : '#ef4444', fontWeight: 700 }}>{ranked[hov].name}</span>
+          {' '}· ERS {ranked[hov].ers.toFixed(3)} · CSAT {ranked[hov].csat} · {ranked[hov].sessions} sessions · {Math.round(ranked[hov].retention * 100)}% retention
+          · {ranked[hov].ers >= 0.65 ? 'AI training eligible' : 'below AI gate'}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default function Page() {
   return (
@@ -1136,7 +1305,7 @@ export default function Page() {
           <p style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: '#94a3b8', lineHeight: 1.75, maxWidth: 680, marginBottom: 48 }}>
             Coto had experts but no intelligence about them. No quality signal, no principled compensation model, no analytics to track performance. I built all three from scratch: a TOPSIS scoring system, a dynamic revenue framework, and a creator analytics dashboard, delivered before the engineering team had capacity to ship anything.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, maxWidth: 680, marginBottom: 48 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 24, maxWidth: 680, marginBottom: 48 }}>
             <AnimatedMetric value="23%"  label="Quality improvement"    note="after ERS implementation" />
             <AnimatedMetric value="95%"  label="Supply retention"        note="from revenue framework" />
             <AnimatedMetric value="300+" label="Verified experts"         note="across 5 categories" />
@@ -1157,7 +1326,7 @@ export default function Page() {
           <p style={{ fontSize: '0.92rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 700, marginBottom: 40 }}>
             Supply-side intelligence has three distinct layers. If you only solve one, the others collapse. A score without compensation means experts don&apos;t care about their ranking. Compensation without analytics means you can&apos;t tell whether any of it is working.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
             {[
               { arc: 'Rank',   icon: '◆', color: VIOLET,    problem: 'Who are your best experts?',       solution: 'TOPSIS Expert Readiness Score. Five criteria, weighted multi-criteria analysis, interpretable per-expert breakdown. Not a black box, and not a naive weighted average.' },
               { arc: 'Reward', icon: '◇', color: '#06b6d4', problem: 'Why would experts prioritise you?', solution: 'Multi-factor revenue share, base 30-90%, with seven additive multipliers across category, region, time band, volume, certification, exclusivity, and performance.' },
@@ -1202,7 +1371,7 @@ export default function Page() {
             A naive weighted average is gameable. An expert can inflate session count while CSAT quietly declines, and their score stays flat. TOPSIS evaluates each expert against the best and worst possible profiles simultaneously, so gaming one criterion pulls back the others. It also handles genuinely conflicting signals, like high volume but slow response time, without collapsing them into noise.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 40 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 40 }}>
             {CRITERIA.map(c => (
               <div key={c.name} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${c.type === 'cost' ? '#f59e0b22' : `${VIOLET}20`}`, borderRadius: 12, padding: '16px', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.4rem', marginBottom: 8, color: c.type === 'cost' ? '#f59e0b' : VIOLET }}>{c.icon}</div>
@@ -1214,6 +1383,8 @@ export default function Page() {
           </div>
 
           <TopsisWalkthrough />
+          <TopsisFormulas />
+          <ERSBarChart />
           <ExpertScatterPlot />
           <WeightedAvgVsTopsis />
           <CredentialTierScale />
@@ -1283,7 +1454,7 @@ export default function Page() {
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.65, marginBottom: 20 }}>
               The revenue share model works at scale. But to launch, you need supply before demand arrives. I designed early bird packages to bring experts on fast, with a 90% revenue share guaranteed for the first 18 months to lock in commitment.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
               {[
                 { pkg: 'Astrology Pioneer',     rev: '75%', guarantee: '18 months', region: 'IN + MENA' },
                 { pkg: 'Wellness First',         rev: '80%', guarantee: '18 months', region: 'SEA' },
@@ -1343,7 +1514,7 @@ export default function Page() {
             Coto&apos;s AI companion was trained on 3M+ real expert conversations, but not all of them. The ERS scoring system became the quality gate for the AI training pipeline: only conversations from experts above the ERS threshold entered the fine-tuning dataset. Low-quality expert conversations were excluded before they could degrade the model.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, marginBottom: 32 }}>
             <div style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${VIOLET}20`, borderRadius: 14, padding: '24px' }}>
               <div style={{ fontSize: '0.7rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>Quality gate thresholds</div>
               {[
@@ -1398,7 +1569,7 @@ export default function Page() {
             <span style={{ fontSize: '0.68rem', color: '#64748b' }}>OUTCOMES</span>
           </div>
           <h2 style={{ fontSize: 'clamp(1.3rem, 2.5vw, 1.9rem)', fontWeight: 700, color: '#f1f5f9', marginBottom: 40 }}>What shipped, what moved</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, marginBottom: 48 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24, marginBottom: 48 }}>
             {[
               { metric: '23%',  label: 'Expert quality rating improvement', note: 'After TOPSIS ERS replaced ad-hoc manual review, 23% lift in average quality ratings across the platform.' },
               { metric: '95%',  label: 'Supply retention rate',              note: 'The dynamic revenue framework produced 95% expert retention, well above the 60-70% industry norm.' },
@@ -1414,7 +1585,7 @@ export default function Page() {
           </div>
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '24px 28px' }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 20 }}>Technical implementation</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
               {[
                 { layer: 'Scoring',      tools: ['Python 3.11', 'NumPy / SciPy', 'Pandas', 'TOPSIS (from scratch)', 'Configurable YAML presets'] },
                 { layer: 'Analytics',    tools: ['dbt (staging + marts)', 'PostgreSQL schema', 'Segment-compatible events', 'Google Sheets dashboard', 'WoW / MoM delta models'] },
@@ -1428,6 +1599,69 @@ export default function Page() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Replication Guide ── */}
+      <section style={{ padding: '0 32px 80px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${VIOLET}10`, border: `1px solid ${VIOLET}25`, borderRadius: 6, padding: '4px 10px', marginBottom: 20 }}>
+            <span style={{ fontSize: '0.68rem', color: VIOLET, fontWeight: 700, letterSpacing: '0.1em' }}>ADAPT IT</span>
+            <span style={{ fontSize: '0.68rem', color: '#64748b' }}>FOR YOUR PLATFORM</span>
+          </div>
+          <h2 style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.7rem)', fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>
+            Apply this framework to any expert marketplace
+          </h2>
+          <p style={{ fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 660, marginBottom: 36 }}>
+            TOPSIS is platform-agnostic. The criteria and weights change; the algorithm does not. Here is how to adapt all three arcs for a different vertical.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+            {[
+              {
+                step: '01',
+                arc: 'Rank',
+                color: VIOLET,
+                title: 'Define your quality criteria',
+                body: 'Pick 4-6 measurable signals. Assign weights that sum to 1.0. Mark each as benefit (higher better) or cost (lower better). Run the Python script with your preset - the algorithm works on any criteria combination.',
+                example: 'Telehealth: credential tier 0.35 (safety-critical) vs. wellness: CSAT 0.30. Same algorithm, different industry logic.',
+              },
+              {
+                step: '02',
+                arc: 'Reward',
+                color: '#06b6d4',
+                title: 'Calibrate your multipliers',
+                body: 'Identify the dimensions that drive supply quality in your market: category risk, geography, time band, volume, certification. Set additive multipliers and a base rate range. Cap at a sustainable maximum.',
+                example: 'Tutoring platform: add subject-difficulty multiplier (+15% for STEM) and exam-season multiplier (+10% peak periods).',
+              },
+              {
+                step: '03',
+                arc: 'Retain',
+                color: '#22c55e',
+                title: 'Instrument before you build',
+                body: 'The 48-metric framework starts with event instrumentation. Track session starts, completions, CSAT submissions, and payment outcomes before anything else. Everything else is computed from those four events.',
+                example: 'Ship the tracking spec in week 1. Build the dashboard in week 3 once data exists. Never the other way around.',
+              },
+            ].map(item => (
+              <div key={item.step} style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${item.color}18`, borderRadius: 14, padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 900, color: item.color, opacity: 0.4 }}>{item.step}</div>
+                  <div style={{ fontSize: '0.7rem', color: item.color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{item.arc}</div>
+                </div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 10 }}>{item.title}</div>
+                <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.65, marginBottom: 14 }}>{item.body}</p>
+                <div style={{ padding: '10px 12px', background: `${item.color}06`, border: `1px solid ${item.color}18`, borderRadius: 8 }}>
+                  <div style={{ fontSize: '0.62rem', color: item.color, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Example</div>
+                  <p style={{ fontSize: '0.76rem', color: '#64748b', lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>{item.example}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 24, padding: '16px 22px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}18`, borderRadius: 12, maxWidth: 680 }}>
+            <div style={{ fontSize: '0.68rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Full code available</div>
+            <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
+              The TOPSIS engine, revenue share model, and creator analytics scripts are all open-source on GitHub with CLI flags for switching presets. Clone the repo, run <code style={{ background: 'rgba(139,92,246,0.12)', padding: '1px 6px', borderRadius: 4, fontSize: '0.78rem', color: VIOLET }}>python analytics/topsis_ers_calculator.py --preset telehealth --compare</code>, and see how the rankings shift.
+            </p>
           </div>
         </div>
       </section>
