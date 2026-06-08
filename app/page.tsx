@@ -93,7 +93,7 @@ function TopsisWalkthrough() {
   const { R, V, Apos, Aneg, dPos, dNeg, ers, order } = computeTopsis(SAMPLE_EXPERTS)
 
   const steps: { id: TopsisStep; label: string; desc: string }[] = [
-    { id: 'raw',        label: '1. Raw scores',     desc: 'Each expert\'s five criterion values as measured. Scales differ — CSAT is 1-5, sessions is 0-300, response time is in minutes.' },
+    { id: 'raw',        label: '1. Raw scores',     desc: 'Each expert\'s five criterion values as measured. Scales differ: CSAT is 1-5, sessions is 0-300, response time is in minutes.' },
     { id: 'normalised', label: '2. Normalised',      desc: 'Euclidean normalisation brings all criteria to a common scale without distortion. Each column divides by its vector magnitude.' },
     { id: 'weighted',   label: '3. Weighted',        desc: 'Multiply each normalised value by its criterion weight. CSAT (0.30) contributes more than Credential Tier (0.10).' },
     { id: 'ideal',      label: '4. Ideal solutions', desc: 'Positive ideal A+: best possible value per criterion. Negative ideal A-: worst. Response Time flips because lower is better.' },
@@ -117,7 +117,7 @@ function TopsisWalkthrough() {
 
   return (
     <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 16 }}>TOPSIS algorithm, step by step — click through to see what changes</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 16 }}>TOPSIS algorithm, step by step · click through to see what changes</div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
         {steps.map(s => (
           <button key={s.id} onClick={() => setStep(s.id)} style={{
@@ -235,7 +235,7 @@ function CredentialTierScale() {
   const [hov, setHov] = useState<number | null>(null)
   return (
     <div style={{ marginTop: 28 }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 14 }}>Credential Tier — ordinal KYC scale, hover each tier</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 14 }}>Credential Tier · ordinal KYC scale, hover each tier</div>
       <div style={{ display: 'flex', gap: 8 }}>
         {TIERS.map((t, i) => {
           const isHov = hov === i
@@ -276,7 +276,7 @@ function ERSScorecard() {
 
   return (
     <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 16 }}>Expert scorecard — select an expert to see their full ERS breakdown</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 16 }}>Expert scorecard · select an expert to see their full ERS breakdown</div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {ranked.map((e, i) => (
           <button key={e.name} onClick={() => setSelected(i)} style={{
@@ -386,7 +386,7 @@ function RevenueShareBuilder() {
 
   return (
     <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>Build an expert&apos;s revenue share — toggle any combination</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>Build an expert&apos;s revenue share · toggle any combination</div>
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
           <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Base rate (negotiated at onboarding)</span>
@@ -396,7 +396,7 @@ function RevenueShareBuilder() {
           onChange={e => setBase(parseInt(e.target.value) / 100)}
           style={{ width: '100%', accentColor: VIOLET, cursor: 'pointer' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#334155', marginTop: 4 }}>
-          <span>30% — new expert</span><span>70% — senior partner</span>
+          <span>30% · new expert</span><span>70% · senior partner</span>
         </div>
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
@@ -430,7 +430,7 @@ function RevenueShareBuilder() {
         {[10, 20, 40].map(s => (
           <div key={s} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '12px 14px' }}>
             <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>{s} sessions/mo</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: VIOLET }}>₹{(s * 500 * total).toLocaleString('en-IN')}</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: VIOLET }}>${(s * 50 * total).toLocaleString()}</div>
             <div style={{ fontSize: '0.68rem', color: '#334155', marginTop: 2 }}>est. monthly earnings</div>
           </div>
         ))}
@@ -458,7 +458,7 @@ function ConversionFunnel() {
 
   return (
     <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>Conversion funnel with churn attribution — hover the right panel</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>Conversion funnel with churn attribution · hover the right panel</div>
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 260 }}>
           {FUNNEL_STAGES.map((stage, i) => {
@@ -563,7 +563,7 @@ function AIQualityGate() {
   const max = GATE_STAGES[0].n
   return (
     <div style={{ marginTop: 28, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>ERS quality gate — how conversations earned entry into Joy&apos;s training set</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>ERS quality gate · how conversations earned entry into Joy&apos;s training set</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {GATE_STAGES.map((stage, i) => {
           const pct    = stage.n / max * 100
@@ -1012,11 +1012,115 @@ function IndustryAdapter() {
   )
 }
 
+// ── ExpertScatterPlot ──────────────────────────────────────────────────────────
+function ExpertScatterPlot() {
+  const [hov, setHov] = useState<number | null>(null)
+  const { ers, order } = computeTopsis(SAMPLE_EXPERTS)
+  const ranked = SAMPLE_EXPERTS.map((e, i) => ({ ...e, ers: ers[i], rank: order.findIndex(o => o.i === i) + 1 }))
+
+  const W = 360, H = 240
+  const pad = { l: 44, r: 16, t: 16, b: 36 }
+  const pW = W - pad.l - pad.r
+  const pH = H - pad.t - pad.b
+
+  const xS = (v: number) => ((v - 3.2) / (5.0 - 3.2)) * pW
+  const yS = (v: number) => pH - ((v - 40) / (220 - 40)) * pH
+  const rS = (v: number) => 9 + v * 14
+
+  const expert = hov !== null ? ranked[hov] : null
+
+  return (
+    <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Expert pool · CSAT vs sessions, bubble size = ERS score</div>
+      <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, marginBottom: 16, maxWidth: 520 }}>
+        Hover any expert. Zara has the highest session count, but ERS sits mid-table. Low CSAT and retention drag her score down despite the volume signal.
+      </p>
+      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <svg width={W} height={H} style={{ overflow: 'visible', fontFamily: 'inherit', flexShrink: 0 }}>
+          <g stroke="rgba(255,255,255,0.04)" strokeWidth="1">
+            {[0, 0.33, 0.67, 1].map(t => (
+              <line key={t} x1={pad.l} y1={pad.t + t * pH} x2={pad.l + pW} y2={pad.t + t * pH} />
+            ))}
+          </g>
+          <line x1={pad.l} y1={pad.t} x2={pad.l} y2={pad.t + pH} stroke="#334155" strokeWidth="1.5" />
+          <line x1={pad.l} y1={pad.t + pH} x2={pad.l + pW} y2={pad.t + pH} stroke="#334155" strokeWidth="1.5" />
+          <text x={pad.l + pW / 2} y={H - 4} textAnchor="middle" fill="#475569" fontSize="9">CSAT</text>
+          <text x={10} y={pad.t + pH / 2} textAnchor="middle" fill="#475569" fontSize="9" transform={`rotate(-90, 10, ${pad.t + pH / 2})`}>Sessions</text>
+          {[3.5, 4.0, 4.5, 5.0].map(v => {
+            const x = pad.l + xS(v)
+            return <g key={v}><line x1={x} y1={pad.t + pH} x2={x} y2={pad.t + pH + 3} stroke="#334155" /><text x={x} y={pad.t + pH + 12} textAnchor="middle" fill="#475569" fontSize="8">{v.toFixed(1)}</text></g>
+          })}
+          {[60, 120, 180].map(v => {
+            const y = pad.t + yS(v)
+            return <g key={v}><line x1={pad.l - 3} y1={y} x2={pad.l} y2={y} stroke="#334155" /><text x={pad.l - 6} y={y + 3} textAnchor="end" fill="#475569" fontSize="8">{v}</text></g>
+          })}
+          {ranked.map((e, i) => {
+            const x = pad.l + xS(e.csat)
+            const y = pad.t + yS(e.sessions)
+            const r = rS(e.ers)
+            const isHov = hov === i
+            const color = e.ers >= 0.65 ? VIOLET : '#ef4444'
+            return (
+              <g key={e.name} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)} style={{ cursor: 'pointer' }}>
+                <circle cx={x} cy={y} r={isHov ? r + 4 : r} fill={`${color}28`} stroke={color} strokeWidth={isHov ? 2.5 : 1.5} style={{ transition: 'r 0.15s' }} />
+                <text x={x} y={y - r - 4} textAnchor="middle" fill={color} fontSize="9" fontWeight="600">{e.name.split(' ')[0]}</text>
+                <text x={x} y={y + 3.5} textAnchor="middle" fill={color} fontSize="8" fontWeight="700">#{e.rank}</text>
+              </g>
+            )
+          })}
+          <g transform={`translate(${pad.l + pW - 4}, ${pad.t + 4})`}>
+            <circle cx={0} cy={0} r={5} fill={`${VIOLET}28`} stroke={VIOLET} strokeWidth={1.5} />
+            <text x={-8} y={4} textAnchor="end" fill={VIOLET} fontSize="8">ERS ≥ 0.65</text>
+            <circle cx={0} cy={14} r={5} fill="#ef444428" stroke="#ef4444" strokeWidth={1.5} />
+            <text x={-8} y={18} textAnchor="end" fill="#ef4444" fontSize="8">ERS &lt; 0.65</text>
+          </g>
+        </svg>
+        <div style={{ flex: 1, minWidth: 180 }}>
+          {expert ? (
+            <div style={{ padding: '16px 18px', background: `${VIOLET}08`, border: `1px solid ${VIOLET}22`, borderRadius: 12 }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 2 }}>{expert.name}</div>
+              <div style={{ fontSize: '0.68rem', color: '#475569', marginBottom: 12 }}>ERS rank #{expert.rank} of {ranked.length}</div>
+              {[
+                { label: 'ERS score', val: expert.ers.toFixed(3), color: expert.ers >= 0.65 ? '#22c55e' : '#ef4444' },
+                { label: 'CSAT', val: expert.csat.toString(), color: '#94a3b8' },
+                { label: 'Sessions', val: expert.sessions.toString(), color: '#94a3b8' },
+                { label: 'Retention', val: `${Math.round(expert.retention * 100)}%`, color: '#94a3b8' },
+                { label: 'Resp. Time', val: `${expert.responseTime}m`, color: '#f59e0b' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', marginBottom: 5 }}>
+                  <span style={{ color: '#475569' }}>{row.label}</span>
+                  <span style={{ color: row.color, fontWeight: 600 }}>{row.val}</span>
+                </div>
+              ))}
+              <div style={{ marginTop: 8, fontSize: '0.7rem', color: expert.ers >= 0.65 ? '#22c55e' : '#ef4444', fontWeight: 600, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                {expert.ers >= 0.65 ? '✓ AI training eligible' : '✗ Below AI gate threshold'}
+              </div>
+            </div>
+          ) : (
+            <div style={{ padding: '16px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12, color: '#334155', fontSize: '0.78rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              Hover an expert
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default function Page() {
   return (
     <div style={{ background: BG, minHeight: '100vh', color: '#e2e8f0' }}>
       <SectionNav />
+
+      {/* companion project banner */}
+      <div style={{ background: 'rgba(139,92,246,0.05)', borderBottom: '1px solid rgba(139,92,246,0.15)', padding: '10px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+        <span style={{ fontSize: '0.72rem', color: '#475569' }}>Part of a two-project system</span>
+        <a href="https://when-demand-exceeds-supply.vercel.app" target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: '0.76rem', color: VIOLET, textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+          Companion: When Demand Exceeds Supply (real-time demand balancing) →
+        </a>
+      </div>
 
       {/* ── Hero ── */}
       <section id="problem" style={{ padding: '80px 32px 100px', position: 'relative', overflow: 'hidden' }}>
@@ -1110,6 +1214,7 @@ export default function Page() {
           </div>
 
           <TopsisWalkthrough />
+          <ExpertScatterPlot />
           <WeightedAvgVsTopsis />
           <CredentialTierScale />
           <ERSScorecard />
@@ -1165,7 +1270,7 @@ export default function Page() {
                 <div style={{ fontSize: '2.4rem', fontWeight: 900, color: VIOLET, letterSpacing: '-0.02em' }}>70%</div>
               </div>
               <div style={{ flex: 1, fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.6 }}>
-                On 20 sessions/month at ₹500 average fee, that&apos;s ₹7,000/month earned. The incentive to take late-night sessions in a high-demand region is built directly into the number, not an ops team&apos;s Slack message.
+                On 20 sessions/month at a $50 average session fee, that&apos;s $700/month earned. The incentive to take late-night sessions in a high-demand region is built directly into the number, not an ops team&apos;s Slack message.
               </div>
             </div>
           </div>
