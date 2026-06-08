@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const VIOLET = '#8b5cf6'
@@ -23,7 +23,7 @@ const NAV_ITEMS = [
   { id: 'rank',     label: 'Rank' },
   { id: 'reward',   label: 'Reward' },
   { id: 'retain',   label: 'Retain' },
-  { id: 'joy',      label: 'Joy AI' },
+  { id: 'joy',      label: 'AI Agent' },
   { id: 'outcomes', label: 'Outcomes' },
 ]
 
@@ -50,6 +50,32 @@ function SectionNav() {
   )
 }
 
+// ── SideNav (fixed right-side progress dots) ───────────────────────────────────
+function SideNav() {
+  const [active, setActive] = useState('')
+  const [hov, setHov] = useState('')
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => { for (const e of entries) if (e.isIntersecting) setActive(e.target.id) },
+      { rootMargin: '-40% 0px -55% 0px' }
+    )
+    NAV_ITEMS.forEach(({ id }) => { const el = document.getElementById(id); if (el) obs.observe(el) })
+    return () => obs.disconnect()
+  }, [])
+  return (
+    <nav className="hidden xl:flex" style={{ position: 'fixed', right: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 50, flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+      {NAV_ITEMS.map(({ id, label }) => (
+        <a key={id} href={`#${id}`} title={label}
+          onMouseEnter={() => setHov(id)} onMouseLeave={() => setHov('')}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+          {hov === id && <span style={{ fontSize: '0.68rem', color: VIOLET, whiteSpace: 'nowrap' }}>{label}</span>}
+          <div style={{ width: active === id ? 10 : 7, height: active === id ? 10 : 7, borderRadius: '50%', background: active === id ? VIOLET : 'rgba(255,255,255,0.2)', transition: 'all 0.2s' }} />
+        </a>
+      ))}
+    </nav>
+  )
+}
+
 // ── TOPSIS engine ──────────────────────────────────────────────────────────────
 const CRITERIA = [
   { name: 'CSAT',            type: 'benefit', weight: 0.30, icon: '★' },
@@ -60,11 +86,11 @@ const CRITERIA = [
 ]
 
 const SAMPLE_EXPERTS = [
-  { name: 'Arjun S.',  csat: 4.8, sessions: 142, retention: 0.73, responseTime: 4.2, credTier: 3 },
-  { name: 'Priya M.',  csat: 4.1, sessions: 89,  retention: 0.61, responseTime: 7.5, credTier: 4 },
-  { name: 'Zara K.',   csat: 3.9, sessions: 210, retention: 0.55, responseTime: 3.8, credTier: 2 },
-  { name: 'Amir H.',   csat: 4.5, sessions: 56,  retention: 0.82, responseTime: 9.1, credTier: 5 },
-  { name: 'Nadia R.',  csat: 3.4, sessions: 178, retention: 0.44, responseTime: 5.3, credTier: 2 },
+  { name: 'Alex R.',  csat: 4.8, sessions: 142, retention: 0.73, responseTime: 4.2, credTier: 3 },
+  { name: 'Jordan M.',  csat: 4.1, sessions: 89,  retention: 0.61, responseTime: 7.5, credTier: 4 },
+  { name: 'Sam K.',   csat: 3.9, sessions: 210, retention: 0.55, responseTime: 3.8, credTier: 2 },
+  { name: 'Taylor B.',   csat: 4.5, sessions: 56,  retention: 0.82, responseTime: 9.1, credTier: 5 },
+  { name: 'Casey L.',  csat: 3.4, sessions: 178, retention: 0.44, responseTime: 5.3, credTier: 2 },
 ]
 
 function computeTopsis(experts: typeof SAMPLE_EXPERTS) {
@@ -214,7 +240,7 @@ function TopsisWalkthrough() {
             )
           })}
           <div style={{ marginTop: 12, padding: '12px 14px', background: `${VIOLET}08`, border: `1px solid ${VIOLET}20`, borderRadius: 10, fontSize: '0.76rem', color: '#94a3b8' }}>
-            Arjun ranks #1 not by dominating any single criterion, but by being geometrically closest to the positive ideal across all five, weighted appropriately. Zara has more sessions, but her CSAT and retention pull her back.
+            Alex ranks first not by dominating any single criterion, but by sitting geometrically closest to the ideal profile across all five, weighted appropriately. Sam has more sessions, but lower CSAT and retention pull the overall score back.
           </div>
         </div>
       )}
@@ -563,7 +589,7 @@ function AIQualityGate() {
   const max = GATE_STAGES[0].n
   return (
     <div style={{ marginTop: 28, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>ERS quality gate · how conversations earned entry into Joy&apos;s training set</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 20 }}>ERS quality gate · how conversations earned entry into the AI training set</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {GATE_STAGES.map((stage, i) => {
           const pct    = stage.n / max * 100
@@ -596,7 +622,7 @@ function AIQualityGate() {
       <div style={{ marginTop: 20, padding: '14px 16px', background: `${VIOLET}08`, border: `1px solid ${VIOLET}20`, borderRadius: 10 }}>
         <div style={{ fontSize: '0.8rem', color: VIOLET, fontWeight: 700, marginBottom: 4 }}>49.6% pass rate, by design</div>
         <p style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
-          The gate is deliberately strict. One low-quality expert conversation in the training set degrades Joy for every user who encounters it afterward. 248 high-quality pairs beat 500 mediocre ones, and the ERS score is what makes the gate principled rather than arbitrary.
+          The gate is deliberately strict. One low-quality expert conversation in the training set degrades the AI agent for future users who encounter it. 248 high-quality pairs beat 500 mediocre ones, and the ERS score is what makes the gate principled rather than arbitrary.
         </p>
       </div>
     </div>
@@ -624,10 +650,10 @@ function WeightedAvgVsTopsis() {
   const { order } = computeTopsis(SAMPLE_EXPERTS)
   const topsisRanked = order.map(o => ({ name: SAMPLE_EXPERTS[o.i].name, score: o.s }))
   const rankColor = (r: number) => r === 0 ? VIOLET : r === 1 ? '#06b6d4' : r === 4 ? '#ef4444' : '#64748b'
-  const zaraWA     = waRanked.findIndex(e => e.name === 'Zara K.')
-  const zaraTopsis = topsisRanked.findIndex(e => e.name === 'Zara K.')
-  const amirWA     = waRanked.findIndex(e => e.name === 'Amir H.')
-  const amirTopsis = topsisRanked.findIndex(e => e.name === 'Amir H.')
+  const zaraWA     = waRanked.findIndex(e => e.name === 'Sam K.')
+  const zaraTopsis = topsisRanked.findIndex(e => e.name === 'Sam K.')
+  const amirWA     = waRanked.findIndex(e => e.name === 'Taylor B.')
+  const amirTopsis = topsisRanked.findIndex(e => e.name === 'Taylor B.')
 
   return (
     <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
@@ -642,10 +668,10 @@ function WeightedAvgVsTopsis() {
             <div key={e.name} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <div style={{ width: 24, height: 24, borderRadius: '50%', background: `${rankColor(rank)}22`, border: `1.5px solid ${rankColor(rank)}60`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: rankColor(rank), flexShrink: 0 }}>{rank + 1}</div>
               <div style={{ flex: 1, height: 32, background: 'rgba(255,255,255,0.04)', borderRadius: 5, position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, width: `${e.score * 100}%`, height: '100%', background: e.name === 'Zara K.' ? '#f59e0b' : rankColor(rank), opacity: 0.4, borderRadius: 5 }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, width: `${e.score * 100}%`, height: '100%', background: e.name === 'Sam K.' ? '#f59e0b' : rankColor(rank), opacity: 0.4, borderRadius: 5 }} />
                 <div style={{ position: 'absolute', top: 0, left: 10, height: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: e.name === 'Zara K.' ? '#f59e0b' : '#e2e8f0' }}>{e.name}</span>
-                  {e.name === 'Zara K.' && <span style={{ fontSize: '0.62rem', color: '#f59e0b', background: 'rgba(245,158,11,0.12)', borderRadius: 4, padding: '1px 5px' }}>sessions inflate</span>}
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: e.name === 'Sam K.' ? '#f59e0b' : '#e2e8f0' }}>{e.name}</span>
+                  {e.name === 'Sam K.' && <span style={{ fontSize: '0.62rem', color: '#f59e0b', background: 'rgba(245,158,11,0.12)', borderRadius: 4, padding: '1px 5px' }}>sessions inflate</span>}
                 </div>
                 <div style={{ position: 'absolute', right: 8, top: 0, height: '100%', display: 'flex', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace' }}>{e.score.toFixed(3)}</span>
@@ -654,7 +680,7 @@ function WeightedAvgVsTopsis() {
             </div>
           ))}
           <div style={{ marginTop: 12, padding: '10px 12px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.18)', borderRadius: 8, fontSize: '0.72rem', color: '#f59e0b', lineHeight: 1.55 }}>
-            Zara ranks #{zaraWA + 1}. Her 210 sessions drive 25% of the score. CSAT 3.9, retention 55%. The average cannot see the imbalance.
+            Sam ranks #{zaraWA + 1}. Her 210 sessions drive 25% of the score. CSAT 3.9, retention 55%. The average cannot see the imbalance.
           </div>
         </div>
         <div>
@@ -663,11 +689,11 @@ function WeightedAvgVsTopsis() {
             <div key={e.name} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <div style={{ width: 24, height: 24, borderRadius: '50%', background: `${rankColor(rank)}22`, border: `1.5px solid ${rankColor(rank)}60`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: rankColor(rank), flexShrink: 0 }}>{rank + 1}</div>
               <div style={{ flex: 1, height: 32, background: 'rgba(255,255,255,0.04)', borderRadius: 5, position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, width: `${e.score * 100}%`, height: '100%', background: e.name === 'Zara K.' ? '#ef4444' : rankColor(rank), opacity: e.name === 'Zara K.' ? 0.35 : 0.5, borderRadius: 5 }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, width: `${e.score * 100}%`, height: '100%', background: e.name === 'Sam K.' ? '#ef4444' : rankColor(rank), opacity: e.name === 'Sam K.' ? 0.35 : 0.5, borderRadius: 5 }} />
                 <div style={{ position: 'absolute', top: 0, left: 10, height: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: e.name === 'Zara K.' ? '#ef4444' : '#e2e8f0' }}>{e.name}</span>
-                  {e.name === 'Zara K.' && <span style={{ fontSize: '0.62rem', color: '#ef4444', background: 'rgba(239,68,68,0.10)', borderRadius: 4, padding: '1px 5px' }}>quality drag caught</span>}
-                  {e.name === 'Amir H.' && rank < amirWA && <span style={{ fontSize: '0.62rem', color: '#22c55e', background: 'rgba(34,197,94,0.10)', borderRadius: 4, padding: '1px 5px' }}>promoted</span>}
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: e.name === 'Sam K.' ? '#ef4444' : '#e2e8f0' }}>{e.name}</span>
+                  {e.name === 'Sam K.' && <span style={{ fontSize: '0.62rem', color: '#ef4444', background: 'rgba(239,68,68,0.10)', borderRadius: 4, padding: '1px 5px' }}>quality drag caught</span>}
+                  {e.name === 'Taylor B.' && rank < amirWA && <span style={{ fontSize: '0.62rem', color: '#22c55e', background: 'rgba(34,197,94,0.10)', borderRadius: 4, padding: '1px 5px' }}>promoted</span>}
                 </div>
                 <div style={{ position: 'absolute', right: 8, top: 0, height: '100%', display: 'flex', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace' }}>{e.score.toFixed(4)}</span>
@@ -676,15 +702,15 @@ function WeightedAvgVsTopsis() {
             </div>
           ))}
           <div style={{ marginTop: 12, padding: '10px 12px', background: `${VIOLET}08`, border: `1px solid ${VIOLET}22`, borderRadius: 8, fontSize: '0.72rem', color: VIOLET, lineHeight: 1.55 }}>
-            Zara drops to #{zaraTopsis + 1}. Amir rises to #{amirTopsis + 1} because CSAT 4.5, retention 82%, and credential tier 5 outweigh raw volume.
+            Sam drops to #{zaraTopsis + 1}. Taylor rises to #{amirTopsis + 1} because CSAT 4.5, retention 82%, and credential tier 5 outweigh raw volume.
           </div>
         </div>
       </div>
       <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
         {[
-          { expert: 'Zara K.',   wa: zaraWA + 1,  top: zaraTopsis + 1, dir: 'down', note: 'High volume hid low quality' },
-          { expert: 'Amir H.',  wa: amirWA + 1,  top: amirTopsis + 1, dir: 'up',   note: 'Depth rewarded over volume' },
-          { expert: 'Arjun S.', wa: 1,            top: 1,              dir: 'same', note: 'Both methods agree' },
+          { expert: 'Sam K.',   wa: zaraWA + 1,  top: zaraTopsis + 1, dir: 'down', note: 'High volume hid low quality' },
+          { expert: 'Taylor B.',  wa: amirWA + 1,  top: amirTopsis + 1, dir: 'up',   note: 'Depth rewarded over volume' },
+          { expert: 'Alex R.', wa: 1,            top: 1,              dir: 'same', note: 'Both methods agree' },
         ].map(s => (
           <div key={s.expert} style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: s.dir === 'down' ? '1px solid #ef444422' : s.dir === 'up' ? '1px solid #22c55e22' : `1px solid ${VIOLET}18`, borderRadius: 10 }}>
             <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>{s.expert}</div>
@@ -872,8 +898,8 @@ const BRIDGE_FLOWS = [
     desc: 'During a Yellow or Red state, the incentive push goes to high-ERS experts first. They respond at 55% vs 30% for low-ERS experts - already invested, already accountable.' },
   { from: 'Barometer Data (When Demand Exceeds Supply)', to: 'D&S Analytics Tab (Rank, Reward, Retain)',  color: '#06b6d4', icon: '📊', dir: 'left',
     desc: 'The Demand and Supply tab in the creator dashboard pulls live barometer signals. An expert can see whether their category is Green, Yellow, or Red and adjust availability accordingly.' },
-  { from: 'Expert Sessions',     to: 'Joy AI Training',          color: '#22c55e', icon: '🤖', dir: 'right',
-    desc: 'Only conversations from experts above ERS 0.65 enter the fine-tuning pipeline. Low-quality conversations are excluded before they can degrade Joy for future users.' },
+  { from: 'Expert Sessions',     to: 'AI Agent Training',          color: '#22c55e', icon: '🤖', dir: 'right',
+    desc: 'Only conversations from experts above ERS 0.65 enter the fine-tuning pipeline. Low-quality conversations are excluded before they can degrade the AI agent for future users.' },
   { from: 'Surge Revenue (When Demand Exceeds Supply)',  to: 'Revenue Analytics (Rank, Reward, Retain)',   color: '#f59e0b', icon: '💰', dir: 'left',
     desc: 'Surge fees from Yellow or Red states appear in the Revenue tab as Surge Revenue and Expert Incentivized Revenue metrics, closing the loop for operators.' },
 ]
@@ -1033,7 +1059,7 @@ function ExpertScatterPlot() {
     <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
       <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Expert pool · CSAT vs sessions, bubble size = ERS score</div>
       <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, marginBottom: 16, maxWidth: 520 }}>
-        Hover any expert. Zara has the highest session count, but ERS sits mid-table. Low CSAT and retention drag her score down despite the volume signal.
+        Hover any expert. Sam has the highest session count, but ERS sits mid-table. Low CSAT and retention drag her score down despite the volume signal.
       </p>
       <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <svg width={W} height={H} style={{ overflow: 'visible', fontFamily: 'inherit', flexShrink: 0 }}>
@@ -1107,6 +1133,24 @@ function ExpertScatterPlot() {
   )
 }
 
+// ── Math helpers ───────────────────────────────────────────────────────────────
+function MF({ n, d }: { n: React.ReactNode; d: React.ReactNode }) {
+  return (
+    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', verticalAlign: 'middle', margin: '0 3px', lineHeight: 1.25 }}>
+      <span style={{ borderBottom: '1.5px solid #94a3b8', paddingBottom: 1, paddingLeft: 5, paddingRight: 5 }}>{n}</span>
+      <span style={{ paddingTop: 2, paddingLeft: 5, paddingRight: 5 }}>{d}</span>
+    </span>
+  )
+}
+function SR({ children }: { children: React.ReactNode }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 1 }}>
+      <span style={{ fontSize: '1.25em', lineHeight: 1 }}>√</span>
+      <span style={{ borderTop: '1.5px solid #94a3b8', paddingTop: 2, paddingLeft: 2, paddingRight: 2 }}>{children}</span>
+    </span>
+  )
+}
+
 // ── TopsisFormulas ──────────────────────────────────────────────────────────────
 function TopsisFormulas() {
   const [step, setStep] = useState(0)
@@ -1116,51 +1160,51 @@ function TopsisFormulas() {
   const raw = SAMPLE_EXPERTS.map(e => [e.csat, e.sessions, e.retention, e.responseTime, e.credTier])
   const colNorms = [0,1,2,3,4].map(j => Math.sqrt(raw.reduce((s, r) => s + r[j] ** 2, 0)))
 
-  const STEPS = [
+  const STEPS: { id: string; label: string; formula: React.ReactNode; note: string; calc: string; calcVal: string; result: string }[] = [
     {
       id: 'norm',
       label: '1  Normalize',
-      formula: 'rij = xij / sqrt(sum xij^2)',
-      note: 'Euclidean normalization removes unit differences. CSAT (1-5) and sessions (0-300) become dimensionless and comparable.',
-      calc: `CSAT column norm = sqrt(${raw.map(r => r[0].toFixed(1) + '²').join(' + ')})`,
-      calcVal: `= sqrt(${raw.reduce((s,r) => s+r[0]**2,0).toFixed(2)}) = ${colNorms[0].toFixed(4)}`,
-      result: `Arjun CSAT normalized: ${e0.csat} / ${colNorms[0].toFixed(4)} = ${R[0][0].toFixed(4)}`,
+      formula: <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>r<sub>ij</sub><span>=</span><MF n={<>x<sub>ij</sub></>} d={<SR>Σ<sub>i</sub> x²<sub>ij</sub></SR>} /></span>,
+      note: 'Euclidean normalisation removes unit differences. CSAT (1–5) and sessions (0–300) become dimensionless and comparable.',
+      calc: `CSAT column norm = √(${raw.map(r => r[0].toFixed(1) + '²').join(' + ')})`,
+      calcVal: `= √(${raw.reduce((s,r) => s+r[0]**2,0).toFixed(2)}) = ${colNorms[0].toFixed(4)}`,
+      result: `Alex CSAT normalised: ${e0.csat} / ${colNorms[0].toFixed(4)} = ${R[0][0].toFixed(4)}`,
     },
     {
       id: 'weight',
       label: '2  Weight',
-      formula: 'vij = wj x rij',
-      note: 'Multiply each normalized score by its criterion weight. CSAT weight = 0.30 contributes 3x more than Credential Tier (0.10).',
-      calc: `Arjun CSAT: 0.30 x ${R[0][0].toFixed(4)}`,
+      formula: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>v<sub>ij</sub><span>=</span>w<sub>j</sub><span>×</span>r<sub>ij</sub></span>,
+      note: 'Multiply each normalised score by its criterion weight. CSAT weight = 0.30 contributes 3× more than Credential Tier (0.10).',
+      calc: `Alex CSAT: 0.30 × ${R[0][0].toFixed(4)}`,
       calcVal: `= ${V[0][0].toFixed(4)}`,
-      result: `5 weighted values for Arjun: [${V[0].map(v => v.toFixed(4)).join(', ')}]`,
+      result: `5 weighted values for Alex: [${V[0].map(v => v.toFixed(4)).join(', ')}]`,
     },
     {
       id: 'ideal',
       label: '3  Ideal',
-      formula: 'A+ = max(vij) for benefit  |  min(vij) for cost',
-      note: 'Positive ideal A+ is the best value per criterion across all experts. Response Time flips — lower is better (cost criterion).',
+      formula: <span style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><span>A<sup>+</sup> = max(v<sub>ij</sub>) <span style={{ fontSize: '0.78em', color: '#64748b', marginLeft: 4 }}>benefit criteria</span></span><span>A<sup>−</sup> = min(v<sub>ij</sub>) <span style={{ fontSize: '0.78em', color: '#64748b', marginLeft: 4 }}>cost criteria</span></span></span>,
+      note: 'Positive ideal A⁺ is the best value per criterion across all experts. Response Time flips — lower is better (cost criterion).',
       calc: `CSAT column values: [${V.map(r => r[0].toFixed(4)).join(', ')}]`,
-      calcVal: `A+ (CSAT) = max = ${Apos[0].toFixed(4)}  |  A+ (Resp. Time) = min = ${Apos[3].toFixed(4)}`,
-      result: `A+ = [${Apos.map(v => v.toFixed(4)).join(', ')}]`,
+      calcVal: `A⁺ (CSAT) = max = ${Apos[0].toFixed(4)}  |  A⁺ (Resp. Time) = min = ${Apos[3].toFixed(4)}`,
+      result: `A⁺ = [${Apos.map(v => v.toFixed(4)).join(', ')}]`,
     },
     {
       id: 'dist',
       label: '4  Distance',
-      formula: 'd+ = sqrt(sum(vij - a+j)^2)  |  d- = sqrt(sum(vij - a-j)^2)',
-      note: 'Euclidean distance from the positive ideal (d+) and negative ideal (d-). Closer to A+ and farther from A- = better expert.',
-      calc: `Arjun d+ = sqrt(sum of squared gaps to A+)`,
-      calcVal: `= ${dPos[0].toFixed(4)}    |    d- = ${dNeg[0].toFixed(4)}`,
-      result: `Arjun is ${dPos[0].toFixed(4)} from the ideal and ${dNeg[0].toFixed(4)} from the worst`,
+      formula: <span style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>d<sup>+</sup><sub>i</sub><span>=</span><SR>Σ<sub>j</sub>(v<sub>ij</sub> − a<sup>+</sup><sub>j</sub>)<sup>2</sup></SR></span><span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>d<sup>−</sup><sub>i</sub><span>=</span><SR>Σ<sub>j</sub>(v<sub>ij</sub> − a<sup>−</sup><sub>j</sub>)<sup>2</sup></SR></span></span>,
+      note: 'Euclidean distance from the positive ideal (d⁺) and negative ideal (d⁻). Closer to A⁺ and farther from A⁻ means a better expert.',
+      calc: `Alex d⁺ = √(sum of squared gaps to A⁺)`,
+      calcVal: `= ${dPos[0].toFixed(4)}    |    d⁻ = ${dNeg[0].toFixed(4)}`,
+      result: `Alex is ${dPos[0].toFixed(4)} from the ideal and ${dNeg[0].toFixed(4)} from the worst`,
     },
     {
       id: 'ers',
       label: '5  ERS Score',
-      formula: 'ERS(i) = d-(i) / (d+(i) + d-(i))',
-      note: 'Relative closeness. ERS = 1.0 means perfect on all criteria simultaneously. Threshold 0.65 gates AI training eligibility.',
-      calc: `Arjun ERS = ${dNeg[0].toFixed(4)} / (${dPos[0].toFixed(4)} + ${dNeg[0].toFixed(4)})`,
+      formula: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>ERS<sub>i</sub><span>=</span><MF n={<>d<sup>−</sup><sub>i</sub></>} d={<>d<sup>+</sup><sub>i</sub> + d<sup>−</sup><sub>i</sub></>} /></span>,
+      note: 'Relative closeness to ideal. ERS = 1.0 means perfect across all criteria simultaneously. Threshold 0.65 gates AI training eligibility.',
+      calc: `Alex ERS = ${dNeg[0].toFixed(4)} / (${dPos[0].toFixed(4)} + ${dNeg[0].toFixed(4)})`,
       calcVal: `= ${dNeg[0].toFixed(4)} / ${(dPos[0]+dNeg[0]).toFixed(4)} = ${ers[0].toFixed(4)}`,
-      result: `ERS ${ers[0].toFixed(4)} ${ers[0] >= 0.65 ? '>= 0.65: AI training eligible' : '< 0.65: below threshold'}`,
+      result: `ERS ${ers[0].toFixed(4)} ${ers[0] >= 0.65 ? '≥ 0.65 — AI training eligible' : '< 0.65 — below threshold'}`,
     },
   ]
 
@@ -1169,7 +1213,7 @@ function TopsisFormulas() {
   return (
     <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
       <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 16 }}>
-        TOPSIS math · formula + worked example using Arjun S.
+        TOPSIS math · formula + worked example using Alex R.
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
         {STEPS.map((st, i) => (
@@ -1184,12 +1228,12 @@ function TopsisFormulas() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 16 }}>
         <div style={{ padding: '18px 20px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}20`, borderRadius: 12 }}>
           <div style={{ fontSize: '0.6rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Formula</div>
-          <div style={{ fontFamily: 'monospace', fontSize: '1.05rem', color: '#e2e8f0', marginBottom: 12, lineHeight: 1.5 }}>{s.formula}</div>
+          <div style={{ fontSize: '1.05rem', color: '#e2e8f0', marginBottom: 12, lineHeight: 2 }}>{s.formula}</div>
           <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.65, margin: 0 }}>{s.note}</p>
         </div>
         <div style={{ padding: '18px 20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
           <div style={{ fontSize: '0.6rem', color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-            Worked: Arjun S. (csat 4.8, sessions 142, retention 73%, resp 4.2m, cred T3)
+            Worked: Alex R. (CSAT 4.8, sessions 142, retention 73%, response 4.2 min, credential T3)
           </div>
           <div style={{ fontFamily: 'monospace', fontSize: '0.79rem', color: '#64748b', lineHeight: 1.9 }}>
             <div>{s.calc}</div>
@@ -1220,7 +1264,7 @@ function ERSBarChart() {
         ERS scores · all 5 experts, AI threshold at 0.65
       </div>
       <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5, marginBottom: 20, maxWidth: 560 }}>
-        Purple bars pass the AI training gate (ERS &ge; 0.65). Red bars fall below. Hover to inspect. Notice Nadia ranks last despite 178 sessions — CSAT 3.4 and 44% retention make her the worst overall profile.
+        Purple bars pass the AI training gate (ERS &ge; 0.65). Red bars fall below. Hover to inspect. Casey ranks last despite 178 sessions — CSAT 3.4 and 44% retention are what the algorithm sees, regardless of volume.
       </p>
       <svg width={svgW} height={svgH} style={{ overflow: 'visible', fontFamily: 'inherit' }}>
         {/* Y gridlines */}
@@ -1281,6 +1325,7 @@ export default function Page() {
   return (
     <div style={{ background: BG, minHeight: '100vh', color: '#e2e8f0' }}>
       <SectionNav />
+      <SideNav />
 
       {/* companion project banner */}
       <div style={{ background: 'rgba(139,92,246,0.05)', borderBottom: '1px solid rgba(139,92,246,0.15)', padding: '10px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
@@ -1297,19 +1342,19 @@ export default function Page() {
         <div style={{ maxWidth: 1000, margin: '0 auto', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: VIOLET }} />
-            <span style={{ fontSize: '0.72rem', color: '#64748b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Expert Marketplace · Supply Intelligence, Singapore 2024</span>
+            <span style={{ fontSize: '0.72rem', color: '#64748b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Expert Marketplace · Supply Intelligence</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2.4rem, 6vw, 4rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 24, color: '#f8fafc' }}>
             Rank, Reward, Retain
           </h1>
           <p style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: '#94a3b8', lineHeight: 1.75, maxWidth: 680, marginBottom: 48 }}>
-            I built the supply intelligence layer for a two-sided expert marketplace from the ground up — a TOPSIS scoring engine to rank every expert against five quality criteria, a dynamic revenue framework that turns platform behaviour into financial incentives, and a full creator analytics suite with 48 tracked metrics. All three systems delivered before the engineering team had capacity to build anything.
+            I built the scoring engine, the revenue model, and the analytics layer for an expert marketplace that had none of the three. The TOPSIS engine ranks counselors, coaches, and therapists across five quality signals — not a weighted average, which is gameable, but a geometric distance from the best and worst possible profiles simultaneously. The revenue framework turns that score into real financial incentives: tier progression, session bonuses, and earnings transparency. All three systems shipped before there was an engineering team to hand them off to.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 24, maxWidth: 680, marginBottom: 48 }}>
             <AnimatedMetric value="23%"  label="Quality improvement"    note="after ERS implementation" />
             <AnimatedMetric value="95%"  label="Supply retention"        note="from revenue framework" />
             <AnimatedMetric value="300+" label="Verified experts"         note="across 5 categories" />
-            <AnimatedMetric value="3M+"  label="Consultations via Joy"   note="quality-gated by ERS" />
+            <AnimatedMetric value="3M+"  label="AI agent consultations"   note="quality-gated by ERS" />
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {['Python · NumPy · SciPy', 'TOPSIS MCDA', 'Google Sheets', 'dbt · PostgreSQL', 'NLP Pipeline', 'Segment-compatible events'].map(tag => (
@@ -1509,7 +1554,7 @@ export default function Page() {
             <span style={{ fontSize: '0.68rem', color: VIOLET, fontWeight: 700, letterSpacing: '0.1em' }}>CH04</span>
             <span style={{ fontSize: '0.68rem', color: '#64748b' }}>THE AI CONNECTION</span>
           </div>
-          <h2 style={{ fontSize: 'clamp(1.3rem, 2.5vw, 1.9rem)', fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>How this data trained Joy</h2>
+          <h2 style={{ fontSize: 'clamp(1.3rem, 2.5vw, 1.9rem)', fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>How ERS gates AI training</h2>
           <p style={{ fontSize: '0.92rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 720, marginBottom: 32 }}>
             The platform&apos;s AI companion was trained on 3M+ real expert conversations, but not all of them. The ERS scoring system became the quality gate for the AI training pipeline: only conversations from experts above the ERS threshold entered the fine-tuning dataset. Low-quality expert conversations were excluded before they could degrade the model.
           </p>
@@ -1555,7 +1600,7 @@ export default function Page() {
           <div style={{ marginTop: 28, padding: '20px 24px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}22`, borderRadius: 12 }}>
             <div style={{ fontWeight: 700, color: VIOLET, fontSize: '0.9rem', marginBottom: 8 }}>The two projects are one system</div>
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>
-              <a href="https://when-demand-exceeds-supply.vercel.app" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: 600 }}>When Demand Exceeds Supply</a> handles real-time routing: during a Yellow state, high-ERS experts receive the incentive push first. <a href="https://rank-reward-retain.vercel.app" style={{ color: VIOLET, textDecoration: 'none', fontWeight: 600 }}>Rank, Reward, Retain</a> generates those ERS scores. Joy then learns from the conversations those high-ERS experts have. The scoring system, the ops layer, and the AI companion are the same pipeline seen from three different vantage points.
+              <a href="https://when-demand-exceeds-supply.vercel.app" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: 600 }}>When Demand Exceeds Supply</a> handles real-time routing: during a Yellow state, high-ERS experts receive the incentive push first. <a href="https://rank-reward-retain.vercel.app" style={{ color: VIOLET, textDecoration: 'none', fontWeight: 600 }}>Rank, Reward, Retain</a> generates those ERS scores. The AI agent then learns from the conversations those high-ERS experts have. The scoring system, the ops layer, and the AI companion are the same pipeline seen from three different vantage points.
             </p>
           </div>
         </div>
@@ -1574,7 +1619,7 @@ export default function Page() {
               { metric: '23%',  label: 'Expert quality rating improvement', note: 'After TOPSIS ERS replaced ad-hoc manual review, 23% lift in average quality ratings across the platform.' },
               { metric: '95%',  label: 'Supply retention rate',              note: 'The dynamic revenue framework produced 95% expert retention, well above the 60-70% industry norm.' },
               { metric: '300+', label: 'Verified experts onboarded',          note: 'Across five wellness categories, all scored, compensated, and tracked via the framework.' },
-              { metric: '3M+',  label: 'Consultations via Joy',               note: 'Joy was trained on quality-gated expert conversations, the direct downstream of the ERS system.' },
+              { metric: '3M+',  label: 'AI agent consultations',               note: 'The AI agent was trained on quality-gated expert conversations, the direct downstream of the ERS system.' },
             ].map(m => (
               <div key={m.metric} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${VIOLET}15`, borderRadius: 16, padding: '28px' }}>
                 <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: VIOLET, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 10 }}>{m.metric}</div>
