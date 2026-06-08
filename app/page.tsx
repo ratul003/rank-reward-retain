@@ -225,7 +225,7 @@ function TopsisWalkthrough() {
 // ── CredentialTierScale ────────────────────────────────────────────────────────
 const TIERS = [
   { tier: 1, label: 'Identity Verified',  desc: 'Government ID confirmed. The minimum entry gate for all categories.', categories: 'All categories' },
-  { tier: 2, label: 'Credentials Added',  desc: 'Relevant certifications or degrees uploaded and reviewed by the Coto team.', categories: 'All categories' },
+  { tier: 2, label: 'Credentials Added',  desc: 'Relevant certifications or degrees uploaded and reviewed by the platform team.', categories: 'All categories' },
   { tier: 3, label: 'Specialisation',     desc: 'Specialisation area verified, professional experience documented and cross-checked.', categories: 'Mental health, Reproductive, Financial' },
   { tier: 4, label: 'Background Checked', desc: 'Full background check passed, references verified, testimonials reviewed.', categories: 'Mental health, Reproductive' },
   { tier: 5, label: 'Institutional',      desc: 'Institutional affiliation confirmed. Highest trust signal on the platform.', categories: 'Mental health, Reproductive, Financial' },
@@ -868,13 +868,13 @@ function QualityImprovementChart() {
 
 // ── ProjectBridge ──────────────────────────────────────────────────────────────
 const BRIDGE_FLOWS = [
-  { from: 'ERS Score (P6)',      to: 'Incentive Priority (P5)', color: VIOLET,    icon: '⭐', dir: 'right',
+  { from: 'ERS Score (Rank, Reward, Retain)',      to: 'Incentive Priority (When Demand Exceeds Supply)', color: VIOLET,    icon: '⭐', dir: 'right',
     desc: 'During a Yellow or Red state, the incentive push goes to high-ERS experts first. They respond at 55% vs 30% for low-ERS experts - already invested, already accountable.' },
-  { from: 'Barometer Data (P5)', to: 'D&S Analytics Tab (P6)',  color: '#06b6d4', icon: '📊', dir: 'left',
+  { from: 'Barometer Data (When Demand Exceeds Supply)', to: 'D&S Analytics Tab (Rank, Reward, Retain)',  color: '#06b6d4', icon: '📊', dir: 'left',
     desc: 'The Demand and Supply tab in the creator dashboard pulls live barometer signals. An expert can see whether their category is Green, Yellow, or Red and adjust availability accordingly.' },
   { from: 'Expert Sessions',     to: 'Joy AI Training',          color: '#22c55e', icon: '🤖', dir: 'right',
     desc: 'Only conversations from experts above ERS 0.65 enter the fine-tuning pipeline. Low-quality conversations are excluded before they can degrade Joy for future users.' },
-  { from: 'Surge Revenue (P5)',  to: 'Revenue Analytics (P6)',   color: '#f59e0b', icon: '💰', dir: 'left',
+  { from: 'Surge Revenue (When Demand Exceeds Supply)',  to: 'Revenue Analytics (Rank, Reward, Retain)',   color: '#f59e0b', icon: '💰', dir: 'left',
     desc: 'Surge fees from Yellow or Red states appear in the Revenue tab as Surge Revenue and Expert Incentivized Revenue metrics, closing the loop for operators.' },
 ]
 
@@ -884,14 +884,14 @@ function ProjectBridge() {
 
   return (
     <div style={{ marginTop: 48, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '28px 30px' }}>
-      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>How P5 and P6 connect - they are one system</div>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>How the two projects connect - they are one system</div>
       <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.65, marginBottom: 28, maxWidth: 640 }}>
-        They look like two separate projects. P5 handles demand intelligence, P6 handles supply intelligence, and each feeds the other. Click the arrows to trace the data flow.
+        They look like two separate projects. <a href="https://when-demand-exceeds-supply.vercel.app" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: 600 }}>When Demand Exceeds Supply</a> handles demand intelligence, <a href="https://rank-reward-retain.vercel.app" style={{ color: VIOLET, textDecoration: 'none', fontWeight: 600 }}>Rank, Reward, Retain</a> handles supply intelligence, and each feeds the other. Click the arrows to trace the data flow.
       </p>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <div style={{ padding: '16px 22px', background: 'rgba(6,182,212,0.08)', border: '2px solid rgba(6,182,212,0.25)', borderRadius: 12, textAlign: 'center', minWidth: 148 }}>
-          <div style={{ fontSize: '0.62rem', color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Project 5</div>
-          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#e2e8f0' }}>Equilibrium</div>
+          <div style={{ fontSize: '0.62rem', color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Companion Project</div>
+          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#e2e8f0' }}>When Demand Exceeds Supply</div>
           <div style={{ fontSize: '0.66rem', color: '#475569', marginTop: 3 }}>Demand intelligence</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
@@ -909,7 +909,7 @@ function ProjectBridge() {
           ))}
         </div>
         <div style={{ padding: '16px 22px', background: `${VIOLET}08`, border: `2px solid ${VIOLET}25`, borderRadius: 12, textAlign: 'center', minWidth: 148 }}>
-          <div style={{ fontSize: '0.62rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Project 6</div>
+          <div style={{ fontSize: '0.62rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>This Project</div>
           <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#e2e8f0' }}>Rank, Reward, Retain</div>
           <div style={{ fontSize: '0.66rem', color: '#475569', marginTop: 3 }}>Supply intelligence</div>
         </div>
@@ -1297,13 +1297,13 @@ export default function Page() {
         <div style={{ maxWidth: 1000, margin: '0 auto', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: VIOLET }} />
-            <span style={{ fontSize: '0.72rem', color: '#64748b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Project 6 · Coto, Singapore 2024</span>
+            <span style={{ fontSize: '0.72rem', color: '#64748b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Expert Marketplace · Supply Intelligence, Singapore 2024</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2.4rem, 6vw, 4rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 24, color: '#f8fafc' }}>
             Rank, Reward, Retain
           </h1>
           <p style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: '#94a3b8', lineHeight: 1.75, maxWidth: 680, marginBottom: 48 }}>
-            Coto had experts but no intelligence about them. No quality signal, no principled compensation model, no analytics to track performance. I built all three from scratch: a TOPSIS scoring system, a dynamic revenue framework, and a creator analytics dashboard, delivered before the engineering team had capacity to ship anything.
+            I built the supply intelligence layer for a two-sided expert marketplace from the ground up — a TOPSIS scoring engine to rank every expert against five quality criteria, a dynamic revenue framework that turns platform behaviour into financial incentives, and a full creator analytics suite with 48 tracked metrics. All three systems delivered before the engineering team had capacity to build anything.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 24, maxWidth: 680, marginBottom: 48 }}>
             <AnimatedMetric value="23%"  label="Quality improvement"    note="after ERS implementation" />
@@ -1356,7 +1356,7 @@ export default function Page() {
             <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: `linear-gradient(${VIOLET}, #06b6d4)` }} />
             <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>The quality problem, circa 2024</div>
             <p style={{ fontSize: '1rem', color: '#e2e8f0', lineHeight: 1.8, marginBottom: 16, fontStyle: 'italic' }}>
-              Coto had hundreds of experts. They had no idea which ones were actually good.
+              The marketplace had hundreds of experts and no way to tell which ones were actually good.
             </p>
             <p style={{ fontSize: '0.92rem', color: '#94a3b8', lineHeight: 1.8, marginBottom: 16 }}>
               CSAT scores existed but weren&apos;t aggregated meaningfully. Session counts were tracked but not weighted against quality. Response time data was in the logs but nobody was joining it to anything. The platform was routing customers to experts based on availability alone, not suitability.
@@ -1411,7 +1411,7 @@ export default function Page() {
           </div>
           <h2 style={{ fontSize: 'clamp(1.3rem, 2.5vw, 1.9rem)', fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>Dynamic Revenue Optimization Framework</h2>
           <p style={{ fontSize: '0.92rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 720, marginBottom: 40 }}>
-            A flat commission splits incentive evenly across all experts and all hours. That&apos;s not what a marketplace needs. Coto needed supply in the right categories, the right regions, the right time bands. The revenue share model is how you steer supply without a scheduling manager working round the clock.
+            A flat commission splits incentive evenly across all experts and all hours. That&apos;s not what a marketplace needs. The platform needed supply in the right categories, the right regions, the right time bands. The revenue share model is how you steer supply without a scheduling manager working round the clock.
           </p>
 
           {/* Worked example */}
@@ -1495,7 +1495,7 @@ export default function Page() {
           <div style={{ marginTop: 28, padding: '18px 22px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
             <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Delivered artifact</div>
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>
-              Three-tab Google Sheets dashboard: Onboarding (creator profiles and KYC status), Demand and Supply (live matching metrics that link back to Project 5&apos;s barometer), and Revenue (earnings, share breakdown, LTV). Running before any analytics engineering was in place, because that&apos;s what the timeline demanded.
+              Three-tab Google Sheets dashboard: Onboarding (creator profiles and KYC status), Demand and Supply (live matching metrics that link back to the companion project&apos;s barometer), and Revenue (earnings, share breakdown, LTV). Running before any analytics engineering was in place, because that&apos;s what the timeline demanded.
             </p>
           </div>
           <ProjectBridge />
@@ -1511,7 +1511,7 @@ export default function Page() {
           </div>
           <h2 style={{ fontSize: 'clamp(1.3rem, 2.5vw, 1.9rem)', fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>How this data trained Joy</h2>
           <p style={{ fontSize: '0.92rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 720, marginBottom: 32 }}>
-            Coto&apos;s AI companion was trained on 3M+ real expert conversations, but not all of them. The ERS scoring system became the quality gate for the AI training pipeline: only conversations from experts above the ERS threshold entered the fine-tuning dataset. Low-quality expert conversations were excluded before they could degrade the model.
+            The platform&apos;s AI companion was trained on 3M+ real expert conversations, but not all of them. The ERS scoring system became the quality gate for the AI training pipeline: only conversations from experts above the ERS threshold entered the fine-tuning dataset. Low-quality expert conversations were excluded before they could degrade the model.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, marginBottom: 32 }}>
@@ -1555,7 +1555,7 @@ export default function Page() {
           <div style={{ marginTop: 28, padding: '20px 24px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}22`, borderRadius: 12 }}>
             <div style={{ fontWeight: 700, color: VIOLET, fontSize: '0.9rem', marginBottom: 8 }}>The two projects are one system</div>
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>
-              Project 5 handles real-time routing: during a Yellow state, high-ERS experts receive the incentive push first. Project 6 generates those ERS scores. Joy then learns from the conversations those high-ERS experts have. The scoring system, the ops layer, and the AI companion are the same pipeline seen from three different vantage points.
+              <a href="https://when-demand-exceeds-supply.vercel.app" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: 600 }}>When Demand Exceeds Supply</a> handles real-time routing: during a Yellow state, high-ERS experts receive the incentive push first. <a href="https://rank-reward-retain.vercel.app" style={{ color: VIOLET, textDecoration: 'none', fontWeight: 600 }}>Rank, Reward, Retain</a> generates those ERS scores. Joy then learns from the conversations those high-ERS experts have. The scoring system, the ops layer, and the AI companion are the same pipeline seen from three different vantage points.
             </p>
           </div>
         </div>

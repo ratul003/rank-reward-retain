@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Rank, Reward, Retain - Wahid Tawsif Ratul",
-  description: "How I built the expert scoring, compensation design, and retention framework that took Coto from zero supply intelligence to 300+ verified experts and 95% supply retention.",
+  description: "How I built the expert scoring, compensation design, and retention framework that took an expert marketplace from zero supply intelligence to 300+ verified experts and 95% supply retention.",
   metadataBase: new URL('https://rank-reward-retain.vercel.app'),
   openGraph: {
     title: 'Rank, Reward, Retain',
-    description: 'TOPSIS expert scoring, dynamic revenue share, and creator analytics - the supply intelligence layer for Coto.',
+    description: 'TOPSIS expert scoring, dynamic revenue share, and creator analytics - the supply intelligence layer for an expert marketplace.',
     url: 'https://rank-reward-retain.vercel.app',
     siteName: 'Wahid Tawsif Ratul',
     locale: 'en_US',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Rank, Reward, Retain',
-    description: 'TOPSIS expert scoring, dynamic revenue share, and creator analytics - the supply intelligence layer for Coto.',
+    description: 'TOPSIS expert scoring, dynamic revenue share, and creator analytics - the supply intelligence layer for an expert marketplace.',
   },
 };
 
