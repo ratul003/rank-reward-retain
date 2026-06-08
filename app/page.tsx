@@ -603,6 +603,415 @@ function AIQualityGate() {
   )
 }
 
+// ── WeightedAvgVsTopsis ────────────────────────────────────────────────────────
+function computeWeightedAvg(experts: typeof SAMPLE_EXPERTS) {
+  const maxSessions = Math.max(...experts.map(e => e.sessions))
+  const minRT = Math.min(...experts.map(e => e.responseTime))
+  const maxRT = Math.max(...experts.map(e => e.responseTime))
+  return experts.map(e => {
+    const csatN = (e.csat - 1) / 4
+    const sessN = e.sessions / (maxSessions || 1)
+    const retN  = e.retention
+    const rtN   = 1 - (e.responseTime - minRT) / ((maxRT - minRT) || 1)
+    const credN = (e.credTier - 1) / 4
+    const score = 0.30 * csatN + 0.25 * sessN + 0.20 * retN + 0.15 * rtN + 0.10 * credN
+    return { name: e.name, score }
+  }).sort((a, b) => b.score - a.score)
+}
+
+function WeightedAvgVsTopsis() {
+  const waRanked = computeWeightedAvg(SAMPLE_EXPERTS)
+  const { order } = computeTopsis(SAMPLE_EXPERTS)
+  const topsisRanked = order.map(o => ({ name: SAMPLE_EXPERTS[o.i].name, score: o.s }))
+  const rankColor = (r: number) => r === 0 ? VIOLET : r === 1 ? '#06b6d4' : r === 4 ? '#ef4444' : '#64748b'
+  const zaraWA     = waRanked.findIndex(e => e.name === 'Zara K.')
+  const zaraTopsis = topsisRanked.findIndex(e => e.name === 'Zara K.')
+  const amirWA     = waRanked.findIndex(e => e.name === 'Amir H.')
+  const amirTopsis = topsisRanked.findIndex(e => e.name === 'Amir H.')
+
+  return (
+    <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>The case against a weighted average</div>
+      <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.65, marginBottom: 24, maxWidth: 680 }}>
+        Same five experts. Same weights. Two methods. The rankings diverge, and that gap is where platform quality either compounds or quietly decays.
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <div>
+          <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 14 }}>Naive Weighted Average</div>
+          {waRanked.map((e, rank) => (
+            <div key={e.name} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: `${rankColor(rank)}22`, border: `1.5px solid ${rankColor(rank)}60`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: rankColor(rank), flexShrink: 0 }}>{rank + 1}</div>
+              <div style={{ flex: 1, height: 32, background: 'rgba(255,255,255,0.04)', borderRadius: 5, position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: `${e.score * 100}%`, height: '100%', background: e.name === 'Zara K.' ? '#f59e0b' : rankColor(rank), opacity: 0.4, borderRadius: 5 }} />
+                <div style={{ position: 'absolute', top: 0, left: 10, height: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: e.name === 'Zara K.' ? '#f59e0b' : '#e2e8f0' }}>{e.name}</span>
+                  {e.name === 'Zara K.' && <span style={{ fontSize: '0.62rem', color: '#f59e0b', background: 'rgba(245,158,11,0.12)', borderRadius: 4, padding: '1px 5px' }}>sessions inflate</span>}
+                </div>
+                <div style={{ position: 'absolute', right: 8, top: 0, height: '100%', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace' }}>{e.score.toFixed(3)}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div style={{ marginTop: 12, padding: '10px 12px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.18)', borderRadius: 8, fontSize: '0.72rem', color: '#f59e0b', lineHeight: 1.55 }}>
+            Zara ranks #{zaraWA + 1}. Her 210 sessions drive 25% of the score. CSAT 3.9, retention 55%. The average cannot see the imbalance.
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.72rem', color: VIOLET, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 14 }}>TOPSIS (Expert Readiness Score)</div>
+          {topsisRanked.map((e, rank) => (
+            <div key={e.name} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: `${rankColor(rank)}22`, border: `1.5px solid ${rankColor(rank)}60`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: rankColor(rank), flexShrink: 0 }}>{rank + 1}</div>
+              <div style={{ flex: 1, height: 32, background: 'rgba(255,255,255,0.04)', borderRadius: 5, position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: `${e.score * 100}%`, height: '100%', background: e.name === 'Zara K.' ? '#ef4444' : rankColor(rank), opacity: e.name === 'Zara K.' ? 0.35 : 0.5, borderRadius: 5 }} />
+                <div style={{ position: 'absolute', top: 0, left: 10, height: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: e.name === 'Zara K.' ? '#ef4444' : '#e2e8f0' }}>{e.name}</span>
+                  {e.name === 'Zara K.' && <span style={{ fontSize: '0.62rem', color: '#ef4444', background: 'rgba(239,68,68,0.10)', borderRadius: 4, padding: '1px 5px' }}>quality drag caught</span>}
+                  {e.name === 'Amir H.' && rank < amirWA && <span style={{ fontSize: '0.62rem', color: '#22c55e', background: 'rgba(34,197,94,0.10)', borderRadius: 4, padding: '1px 5px' }}>promoted</span>}
+                </div>
+                <div style={{ position: 'absolute', right: 8, top: 0, height: '100%', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace' }}>{e.score.toFixed(4)}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div style={{ marginTop: 12, padding: '10px 12px', background: `${VIOLET}08`, border: `1px solid ${VIOLET}22`, borderRadius: 8, fontSize: '0.72rem', color: VIOLET, lineHeight: 1.55 }}>
+            Zara drops to #{zaraTopsis + 1}. Amir rises to #{amirTopsis + 1} because CSAT 4.5, retention 82%, and credential tier 5 outweigh raw volume.
+          </div>
+        </div>
+      </div>
+      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        {[
+          { expert: 'Zara K.',   wa: zaraWA + 1,  top: zaraTopsis + 1, dir: 'down', note: 'High volume hid low quality' },
+          { expert: 'Amir H.',  wa: amirWA + 1,  top: amirTopsis + 1, dir: 'up',   note: 'Depth rewarded over volume' },
+          { expert: 'Arjun S.', wa: 1,            top: 1,              dir: 'same', note: 'Both methods agree' },
+        ].map(s => (
+          <div key={s.expert} style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: s.dir === 'down' ? '1px solid #ef444422' : s.dir === 'up' ? '1px solid #22c55e22' : `1px solid ${VIOLET}18`, borderRadius: 10 }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>{s.expert}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: '0.72rem', color: '#f59e0b' }}>WA: #{s.wa}</span>
+              <span style={{ fontSize: '0.72rem', color: '#334155' }}>→</span>
+              <span style={{ fontSize: '0.72rem', color: s.dir === 'down' ? '#ef4444' : s.dir === 'up' ? '#22c55e' : VIOLET, fontWeight: 700 }}>ERS: #{s.top}</span>
+            </div>
+            <div style={{ fontSize: '0.66rem', color: '#475569', lineHeight: 1.45 }}>{s.note}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── LiveERSSimulator ───────────────────────────────────────────────────────────
+function LiveERSSimulator() {
+  const [csat,         setCsat]         = useState(4.2)
+  const [sessions,     setSessions]     = useState(90)
+  const [retention,    setRetention]    = useState(0.65)
+  const [responseTime, setResponseTime] = useState(6.0)
+  const [credTier,     setCredTier]     = useState(3)
+
+  const hypothetical = { name: 'You', csat, sessions, retention, responseTime, credTier }
+  const poolWithHyp  = [...SAMPLE_EXPERTS, hypothetical]
+  const { ers, order } = computeTopsis(poolWithHyp)
+  const hypIdx  = poolWithHyp.length - 1
+  const hypErs  = ers[hypIdx]
+  const hypRank = order.findIndex(o => o.i === hypIdx) + 1
+  const aiGate  = hypErs >= 0.65
+
+  const raw     = [csat, sessions, retention, responseTime, credTier]
+  const rawPool = poolWithHyp.map(e => [e.csat, e.sessions, e.retention, e.responseTime, e.credTier])
+  const norms   = CRITERIA.map((_, j) => Math.sqrt(rawPool.reduce((s, r) => s + r[j] ** 2, 0)))
+  const wVals   = raw.map((v, j) => (v / (norms[j] || 1)) * CRITERIA[j].weight)
+  const maxW    = CRITERIA.map((_, j) => Math.max(...rawPool.map(r => r[j] / (norms[j] || 1) * CRITERIA[j].weight)))
+  const stateColor = hypErs >= 0.80 ? '#22c55e' : hypErs >= 0.65 ? VIOLET : '#64748b'
+
+  const sliders = [
+    { label: 'CSAT',            icon: '★', val: csat,         set: (v: number) => setCsat(v),         min: 1,    max: 5,   step: 0.1,  fmt: (v: number) => v.toFixed(1),              cost: false },
+    { label: 'Session Count',   icon: '◎', val: sessions,     set: (v: number) => setSessions(v),     min: 5,    max: 300, step: 5,    fmt: (v: number) => String(Math.round(v)),     cost: false },
+    { label: 'Retention Rate',  icon: '↩', val: retention,    set: (v: number) => setRetention(v),    min: 0.10, max: 1.0, step: 0.01, fmt: (v: number) => `${Math.round(v * 100)}%`, cost: false },
+    { label: 'Response Time',   icon: '⏱', val: responseTime, set: (v: number) => setResponseTime(v), min: 1,    max: 20,  step: 0.5,  fmt: (v: number) => `${v.toFixed(1)}m`,        cost: true  },
+    { label: 'Credential Tier', icon: '✓', val: credTier,     set: (v: number) => setCredTier(v),     min: 1,    max: 5,   step: 1,    fmt: (v: number) => `Tier ${Math.round(v)}`,   cost: false },
+  ]
+
+  return (
+    <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: `1px solid ${stateColor}28`, borderRadius: 16, padding: '24px 26px', transition: 'border-color 0.4s' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Build your expert profile - watch ERS update live</div>
+      <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: 24, maxWidth: 640 }}>
+        If you were adapting this for your own platform - telehealth, tutoring, freelance - this is where you would start. Drag the sliders to profile a hypothetical expert. The TOPSIS engine runs against the pool in real time.
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24 }}>
+        <div>
+          {sliders.map((s, i) => (
+            <div key={s.label} style={{ marginBottom: 18 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: '0.78rem', color: s.cost ? '#f59e0b' : '#94a3b8' }}>
+                  {s.icon} {s.label}{s.cost && <span style={{ fontSize: '0.62rem', color: '#334155' }}> (lower is better)</span>}
+                </span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: s.cost ? '#f59e0b' : VIOLET }}>{s.fmt(s.val)}</span>
+              </div>
+              <input type="range" min={s.min} max={s.max} step={s.step} value={s.val}
+                onChange={e => s.set(parseFloat(e.target.value))}
+                style={{ width: '100%', accentColor: s.cost ? '#f59e0b' : VIOLET, cursor: 'pointer' }} />
+              <div style={{ height: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 2, marginTop: 5, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min(100, (wVals[i] / (maxW[i] || 1)) * 100)}%`, background: s.cost ? '#f59e0b' : VIOLET, opacity: 0.6, borderRadius: 2, transition: 'width 0.15s' }} />
+              </div>
+              <div style={{ fontSize: '0.6rem', color: '#334155', marginTop: 2 }}>Weighted contribution: {(wVals[i] * 100).toFixed(2)} pts</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ padding: '20px', background: `${stateColor}10`, border: `2px solid ${stateColor}30`, borderRadius: 14, textAlign: 'center', transition: 'all 0.4s' }}>
+            <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Expert Readiness Score</div>
+            <div style={{ fontSize: '2.8rem', fontWeight: 900, color: stateColor, letterSpacing: '-0.03em', lineHeight: 1, transition: 'color 0.4s' }}>{hypErs.toFixed(3)}</div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 8 }}>Rank #{hypRank} of {poolWithHyp.length}</div>
+          </div>
+          <div style={{ padding: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
+            <div style={{ fontSize: '0.7rem', color: aiGate ? '#22c55e' : '#475569', fontWeight: 700, marginBottom: 6 }}>
+              {aiGate ? '✓ AI training eligible' : '✗ Below AI gate (ERS < 0.65)'}
+            </div>
+            <div style={{ fontSize: '0.68rem', color: '#334155', lineHeight: 1.55 }}>
+              {aiGate ? 'Conversations would enter the fine-tuning dataset.' : 'Stored for analytics only. Not fed to the model.'}
+            </div>
+          </div>
+          <div style={{ padding: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
+            <div style={{ fontSize: '0.7rem', color: '#64748b', marginBottom: 8 }}>Pool comparison</div>
+            {order.map(({ i: expIdx, s: score }, rank) => {
+              const isYou = expIdx === hypIdx
+              return (
+                <div key={rank} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  <span style={{ fontSize: '0.7rem', color: isYou ? stateColor : '#64748b', fontWeight: isYou ? 700 : 400 }}>#{rank + 1} {isYou ? 'You' : poolWithHyp[expIdx].name}</span>
+                  <span style={{ fontSize: '0.7rem', color: isYou ? stateColor : '#334155', fontFamily: 'monospace' }}>{score.toFixed(3)}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── QualityImprovementChart ────────────────────────────────────────────────────
+const Q_BINS   = ['1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0']
+const Q_BEFORE = [3, 8, 14, 22, 28, 19, 12, 7, 4]
+const Q_AFTER  = [1, 2,  4,  6, 10, 18, 32, 24, 11]
+
+function QualityImprovementChart() {
+  const [show, setShow] = useState<'before' | 'after' | 'both'>('both')
+  const globalMax  = Math.max(...Q_BEFORE, ...Q_AFTER)
+  const totalB     = Q_BEFORE.reduce((s, n) => s + n, 0)
+  const totalA     = Q_AFTER.reduce((s, n) => s + n, 0)
+  const meanBefore = Q_BINS.reduce((s, b, i) => s + parseFloat(b) * Q_BEFORE[i], 0) / totalB
+  const meanAfter  = Q_BINS.reduce((s, b, i) => s + parseFloat(b) * Q_AFTER[i],  0) / totalA
+  const BAR_H      = 110
+
+  return (
+    <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>CSAT distribution shift after ERS implementation</div>
+      <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: 20, maxWidth: 640 }}>
+        Before ERS, routing was based on availability. The distribution was flat and left-heavy. After ERS-guided routing started prioritising high-scoring experts, the whole curve shifted right. That&apos;s where the 23% quality improvement comes from.
+      </p>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {(['before', 'after', 'both'] as const).map(s => (
+          <button key={s} onClick={() => setShow(s)} style={{
+            padding: '7px 14px', borderRadius: 8, cursor: 'pointer', fontSize: '0.76rem', fontWeight: 600,
+            border: `2px solid ${show === s ? VIOLET : 'rgba(255,255,255,0.08)'}`,
+            background: show === s ? `${VIOLET}18` : 'rgba(255,255,255,0.02)',
+            color: show === s ? VIOLET : '#64748b', transition: 'all 0.15s',
+          }}>{s === 'before' ? 'Before ERS' : s === 'after' ? 'After ERS' : 'Overlay'}</button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: BAR_H + 28, paddingBottom: 22, position: 'relative' }}>
+        {Q_BINS.map((bin, i) => {
+          const bH = (Q_BEFORE[i] / globalMax) * BAR_H
+          const aH = (Q_AFTER[i]  / globalMax) * BAR_H
+          return (
+            <div key={bin} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: BAR_H + 28, position: 'relative' }}>
+              <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 1, height: BAR_H }}>
+                {(show === 'before' || show === 'both') && (
+                  <div style={{ flex: 1, height: bH, background: '#f59e0b', opacity: show === 'both' ? 0.45 : 0.65, borderRadius: '3px 3px 0 0', transition: 'height 0.4s' }} />
+                )}
+                {(show === 'after' || show === 'both') && (
+                  <div style={{ flex: 1, height: aH, background: VIOLET, opacity: 0.65, borderRadius: '3px 3px 0 0', transition: 'height 0.4s' }} />
+                )}
+              </div>
+              <div style={{ fontSize: '0.58rem', color: '#334155', position: 'absolute', bottom: 0 }}>{bin}</div>
+            </div>
+          )
+        })}
+        {(show === 'before' || show === 'both') && (
+          <div style={{ position: 'absolute', bottom: 22, left: `${((meanBefore - 1) / 4) * 100}%`, width: 1, height: BAR_H, background: '#f59e0b', opacity: 0.9 }}>
+            <div style={{ position: 'absolute', top: -16, left: 4, fontSize: '0.6rem', color: '#f59e0b', whiteSpace: 'nowrap' }}>avg {meanBefore.toFixed(1)}</div>
+          </div>
+        )}
+        {(show === 'after' || show === 'both') && (
+          <div style={{ position: 'absolute', bottom: 22, left: `${((meanAfter - 1) / 4) * 100}%`, width: 1, height: BAR_H, background: VIOLET, opacity: 0.9 }}>
+            <div style={{ position: 'absolute', top: -16, left: 4, fontSize: '0.6rem', color: VIOLET, whiteSpace: 'nowrap' }}>avg {meanAfter.toFixed(1)}</div>
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
+        {[
+          { label: 'Avg CSAT before', value: meanBefore.toFixed(2),                                           color: '#f59e0b' },
+          { label: 'Avg CSAT after',  value: meanAfter.toFixed(2),                                            color: VIOLET   },
+          { label: 'Improvement',     value: `+${(meanAfter - meanBefore).toFixed(2)} pts`,                   color: '#22c55e' },
+          { label: 'Quality lift',    value: `+${Math.round((meanAfter - meanBefore) / meanBefore * 100)}%`,  color: '#22c55e' },
+        ].map(s => (
+          <div key={s.label} style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${s.color}20`, borderRadius: 10 }}>
+            <div style={{ fontSize: '0.62rem', color: '#64748b', marginBottom: 3 }}>{s.label}</div>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── ProjectBridge ──────────────────────────────────────────────────────────────
+const BRIDGE_FLOWS = [
+  { from: 'ERS Score (P6)',      to: 'Incentive Priority (P5)', color: VIOLET,    icon: '⭐', dir: 'right',
+    desc: 'During a Yellow or Red state, the incentive push goes to high-ERS experts first. They respond at 55% vs 30% for low-ERS experts - already invested, already accountable.' },
+  { from: 'Barometer Data (P5)', to: 'D&S Analytics Tab (P6)',  color: '#06b6d4', icon: '📊', dir: 'left',
+    desc: 'The Demand and Supply tab in the creator dashboard pulls live barometer signals. An expert can see whether their category is Green, Yellow, or Red and adjust availability accordingly.' },
+  { from: 'Expert Sessions',     to: 'Joy AI Training',          color: '#22c55e', icon: '🤖', dir: 'right',
+    desc: 'Only conversations from experts above ERS 0.65 enter the fine-tuning pipeline. Low-quality conversations are excluded before they can degrade Joy for future users.' },
+  { from: 'Surge Revenue (P5)',  to: 'Revenue Analytics (P6)',   color: '#f59e0b', icon: '💰', dir: 'left',
+    desc: 'Surge fees from Yellow or Red states appear in the Revenue tab as Surge Revenue and Expert Incentivized Revenue metrics, closing the loop for operators.' },
+]
+
+function ProjectBridge() {
+  const [active, setActive] = useState(0)
+  const flow = BRIDGE_FLOWS[active]
+
+  return (
+    <div style={{ marginTop: 48, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '28px 30px' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>How P5 and P6 connect - they are one system</div>
+      <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.65, marginBottom: 28, maxWidth: 640 }}>
+        They look like two separate projects. P5 handles demand intelligence, P6 handles supply intelligence, and each feeds the other. Click the arrows to trace the data flow.
+      </p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+        <div style={{ padding: '16px 22px', background: 'rgba(6,182,212,0.08)', border: '2px solid rgba(6,182,212,0.25)', borderRadius: 12, textAlign: 'center', minWidth: 148 }}>
+          <div style={{ fontSize: '0.62rem', color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Project 5</div>
+          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#e2e8f0' }}>Equilibrium</div>
+          <div style={{ fontSize: '0.66rem', color: '#475569', marginTop: 3 }}>Demand intelligence</div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          {BRIDGE_FLOWS.map((f, i) => (
+            <button key={i} onClick={() => setActive(i)} style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20,
+              border: `1.5px solid ${active === i ? f.color : 'rgba(255,255,255,0.08)'}`,
+              background: active === i ? `${f.color}12` : 'rgba(255,255,255,0.02)',
+              cursor: 'pointer', transition: 'all 0.15s', fontSize: '0.68rem',
+              color: active === i ? f.color : '#475569',
+            }}>
+              <span>{f.icon}</span>
+              <span style={{ fontWeight: active === i ? 700 : 400 }}>{f.dir === 'right' ? '→' : '←'}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{ padding: '16px 22px', background: `${VIOLET}08`, border: `2px solid ${VIOLET}25`, borderRadius: 12, textAlign: 'center', minWidth: 148 }}>
+          <div style={{ fontSize: '0.62rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Project 6</div>
+          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#e2e8f0' }}>Rank, Reward, Retain</div>
+          <div style={{ fontSize: '0.66rem', color: '#475569', marginTop: 3 }}>Supply intelligence</div>
+        </div>
+      </div>
+      <div style={{ padding: '18px 20px', background: `${flow.color}08`, border: `1px solid ${flow.color}25`, borderRadius: 12, transition: 'all 0.3s' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '1.1rem' }}>{flow.icon}</span>
+          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: flow.color }}>{flow.from}</span>
+          <span style={{ fontSize: '0.72rem', color: '#334155' }}>{flow.dir === 'right' ? '→' : '←'}</span>
+          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: flow.color }}>{flow.to}</span>
+        </div>
+        <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>{flow.desc}</p>
+      </div>
+    </div>
+  )
+}
+
+// ── IndustryAdapter ────────────────────────────────────────────────────────────
+const INDUSTRY_PRESETS = [
+  { id: 'wellness',  label: 'Wellness', icon: '🌿', color: VIOLET,    weights: [0.30, 0.25, 0.20, 0.15, 0.10],
+    note: 'CSAT anchors quality. Session volume matters for supply depth. Credential tier is an entry gate, not a differentiator.',
+    mults: ['15-20% category', '10% region', '15% time band', '10% volume', '15% certification', '25% exclusive contract'],
+    examples: ['Astrology', 'Mental Health', 'Relationship', 'Reproductive', 'Financial Coaching'] },
+  { id: 'telehealth', label: 'Telehealth', icon: '🏥', color: '#06b6d4', weights: [0.25, 0.10, 0.15, 0.15, 0.35],
+    note: 'Credential tier dominates. A medical license is not optional. Volume is secondary - not a ranking driver.',
+    mults: ['20-30% category', '5% region', '10% time band', '5% volume', '30% certification', '15% exclusive contract'],
+    examples: ['Primary Care', 'Urgent Care', 'Mental Health', 'Specialist Referral'] },
+  { id: 'tutoring', label: 'Tutoring', icon: '📚', color: '#f59e0b', weights: [0.20, 0.15, 0.35, 0.15, 0.15],
+    note: 'Retention is everything. A tutor who keeps students coming back is worth more than one who delivers one-off sessions with high CSAT.',
+    mults: ['10-15% category', '5% region', '20% time band', '15% volume', '10% certification', '10% exclusive contract'],
+    examples: ['Mathematics', 'Sciences', 'Languages', 'Test Prep'] },
+  { id: 'freelance', label: 'Freelance', icon: '💼', color: '#22c55e', weights: [0.25, 0.20, 0.20, 0.30, 0.05],
+    note: 'Response time is the product. Freelancers who respond within minutes win 3x more contracts. Credential tier barely moves the needle.',
+    mults: ['15-25% category', '0% region', '0% time band', '20% volume', '5% certification', '20% exclusive contract'],
+    examples: ['Design', 'Development', 'Writing', 'Marketing', 'Video'] },
+]
+
+function IndustryAdapter() {
+  const [active, setActive] = useState('wellness')
+  const preset = INDUSTRY_PRESETS.find(p => p.id === active)!
+
+  return (
+    <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '24px 26px' }}>
+      <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Adapt this framework to your industry</div>
+      <p style={{ fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.65, marginBottom: 24, maxWidth: 680 }}>
+        TOPSIS and the revenue share model are industry-agnostic. The only thing that changes is the criterion weights. Here is how the configuration shifts across four verticals, and why each shift makes sense.
+      </p>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+        {INDUSTRY_PRESETS.map(p => (
+          <button key={p.id} onClick={() => setActive(p.id)} style={{
+            padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600,
+            border: `2px solid ${active === p.id ? p.color : 'rgba(255,255,255,0.08)'}`,
+            background: active === p.id ? `${p.color}15` : 'rgba(255,255,255,0.02)',
+            color: active === p.id ? p.color : '#64748b', transition: 'all 0.15s',
+          }}>{p.icon} {p.label}</button>
+        ))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <div>
+          <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>Criterion weights</div>
+          {CRITERIA.map((c, i) => (
+            <div key={c.name} style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: '0.76rem', color: c.type === 'cost' ? '#f59e0b' : '#94a3b8' }}>{c.icon} {c.name}</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: preset.color }}>{Math.round(preset.weights[i] * 100)}%</span>
+              </div>
+              <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${preset.weights[i] * 100}%`, background: preset.color, opacity: 0.7, borderRadius: 3, transition: 'width 0.4s, background 0.3s' }} />
+              </div>
+            </div>
+          ))}
+          <div style={{ marginTop: 14, padding: '12px 14px', background: `${preset.color}08`, border: `1px solid ${preset.color}20`, borderRadius: 10, fontSize: '0.76rem', color: preset.color, lineHeight: 1.6 }}>
+            {preset.note}
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>Revenue multiplier ranges</div>
+          {preset.mults.map(m => {
+            const spaceIdx = m.indexOf(' ')
+            const val   = m.slice(0, spaceIdx)
+            const label = m.slice(spaceIdx + 1)
+            return (
+              <div key={m} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ fontSize: '0.76rem', color: '#94a3b8', textTransform: 'capitalize' }}>{label}</span>
+                <span style={{ fontSize: '0.76rem', color: preset.color, fontWeight: 700 }}>+{val}</span>
+              </div>
+            )
+          })}
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Example categories</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {preset.examples.map(ex => (
+                <span key={ex} style={{ padding: '4px 10px', borderRadius: 6, background: `${preset.color}10`, border: `1px solid ${preset.color}22`, fontSize: '0.72rem', color: '#94a3b8' }}>{ex}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default function Page() {
   return (
@@ -701,8 +1110,11 @@ export default function Page() {
           </div>
 
           <TopsisWalkthrough />
+          <WeightedAvgVsTopsis />
           <CredentialTierScale />
           <ERSScorecard />
+          <LiveERSSimulator />
+          <QualityImprovementChart />
 
           <div style={{ marginTop: 28, padding: '18px 22px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}18`, borderRadius: 12 }}>
             <div style={{ fontSize: '0.68rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Design decision: not a black box</div>
@@ -710,6 +1122,7 @@ export default function Page() {
               Every ERS output includes a per-criterion breakdown. Operators can see exactly why Expert A outranks Expert B and which criterion is the gap. That interpretability matters: a score that ops can&apos;t explain cannot drive decisions about routing, training, or compensation.
             </p>
           </div>
+          <IndustryAdapter />
         </div>
       </section>
 
@@ -809,6 +1222,7 @@ export default function Page() {
               Three-tab Google Sheets dashboard: Onboarding (creator profiles and KYC status), Demand and Supply (live matching metrics that link back to Project 5&apos;s barometer), and Revenue (earnings, share breakdown, LTV). Running before any analytics engineering was in place, because that&apos;s what the timeline demanded.
             </p>
           </div>
+          <ProjectBridge />
         </div>
       </section>
 

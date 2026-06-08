@@ -2,23 +2,35 @@
 topsis_ers_calculator.py
 
 TOPSIS-based Expert Readiness Score (ERS) for the Rank, Reward, Retain framework.
-Ranks experts across five criteria, producing a score in [0, 1] — where 1 is closest
-to the ideal expert profile. Interpretable, auditable, and ungameable.
+Ranks experts 0-1 against five criteria, where 1 is closest to the ideal expert
+profile simultaneously across all dimensions.
 
 Algorithm steps:
-  1. Build decision matrix (experts × criteria)
-  2. Euclidean normalisation (removes scale differences)
+  1. Build decision matrix (experts x criteria)
+  2. Euclidean normalisation (removes scale differences without distorting ratios)
   3. Apply criterion weights
   4. Determine positive ideal (A+) and negative ideal (A-)
-  5. Compute separation distances
-  6. Compute relative closeness (ERS)
+  5. Compute Euclidean separation distances
+  6. Compute relative closeness (ERS = d- / (d+ + d-))
 
 Usage:
     python analytics/topsis_ers_calculator.py
+    python analytics/topsis_ers_calculator.py --preset telehealth --top 5
+    python analytics/topsis_ers_calculator.py --preset wellness --compare
+    python analytics/topsis_ers_calculator.py --preset tutoring --export results.csv
+
+Presets:
+    wellness   - Coto wellness platform (CSAT + volume + retention + speed + credential)
+    telehealth - Medical/clinical (credential tier dominates; volume secondary)
+    tutoring   - EdTech (retention dominates; students coming back = quality signal)
+    freelance  - Fiverr-type (response time dominates; credential barely matters)
 """
 
 from __future__ import annotations
 
+import argparse
+import csv
+import sys
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field
@@ -87,6 +99,21 @@ TUTORING_CRITERIA: list[Criterion] = [
     Criterion("response_time",  CriterionType.COST,    0.15),
     Criterion("credential_tier",CriterionType.BENEFIT, 0.10),
 ]
+
+FREELANCE_CRITERIA: list[Criterion] = [
+    Criterion("csat",           CriterionType.BENEFIT, 0.25),
+    Criterion("session_count",  CriterionType.BENEFIT, 0.20),
+    Criterion("retention_rate", CriterionType.BENEFIT, 0.20),
+    Criterion("response_time",  CriterionType.COST,    0.30),  # speed is the product
+    Criterion("credential_tier",CriterionType.BENEFIT, 0.05),
+]
+
+PRESET_MAP = {
+    "wellness":  COTO_WELLNESS_CRITERIA,
+    "telehealth": TELEHEALTH_CRITERIA,
+    "tutoring":  TUTORING_CRITERIA,
+    "freelance": FREELANCE_CRITERIA,
+}
 
 
 # ── TOPSIS Engine ─────────────────────────────────────────────────────────────
@@ -195,46 +222,124 @@ def build_expert_pool(n: int = 20, rng: Optional[np.random.Generator] = None) ->
     return experts
 
 
-# ── Demo ─────────────────────────────────────────────────────────────────────
+# ── Export helper ─────────────────────────────────────────────────────────────
+
+def export_to_csv(results: list[ERSResult], experts: list[Expert], path: str) -> None:
+    rows = []
+    exp_map = {e.id: e for e in experts}
+    for r in results:
+        e = exp_map[r.expert_id]
+        rows.append({
+            "rank": r.rank, "name": r.expert_name, "category": r.category,
+            "ers_score": r.ers_score,
+            "csat": e.csat, "session_count": e.session_count,
+            "retention_rate": e.retention_rate, "response_time": e.response_time,
+            "credential_tier": e.credential_tier,
+            "ai_eligible": r.ers_score >= 0.65,
+        })
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"Exported {len(rows)} rows to {path}")
+
+
+# ── Preset comparison ──────────────────────────────────────────────────────────
+
+def compare_presets(experts: list[Expert]) -> None:
+    print("\n" + "=" * 70)
+    print("PRESET COMPARISON: same expert pool, different industry weights")
+    print("=" * 70)
+    print("Ranking shifts reveal which criteria drive quality in each vertical.\n")
+
+    preset_results: dict[str, list[ERSResult]] = {}
+    for label, criteria in PRESET_MAP.items():
+        eng = TopsisERS(criteria, min_sessions=5)
+        preset_results[label] = eng.score(experts)
+
+    # Header
+    col = 18
+    header = f"{'Expert':<14}" + "".join(f"{p:<{col}}" for p in PRESET_MAP)
+    print(header)
+    print("-" * len(header))
+
+    # Collect all expert names in wellness order
+    for r in preset_results["wellness"]:
+        row = f"{r.expert_name:<14}"
+        for label, res in preset_results.items():
+            match = next((x for x in res if x.expert_name == r.expert_name), None)
+            if match:
+                row += f"#{match.rank} ({match.ers_score:.3f}){'':<{col - 14}}"
+        print(row)
+
+    print("\nKey insight: Credential tier weight (5% freelance vs 35% telehealth)")
+    print("shifts rankings dramatically. Response time weight (30% freelance vs")
+    print("10% telehealth) equally so. Same expert, different platform = different rank.")
+
+
+# ── CLI + Demo ─────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    rng = np.random.default_rng(42)
-    experts = build_expert_pool(20, rng)
+    parser = argparse.ArgumentParser(
+        description="TOPSIS Expert Readiness Score (ERS) calculator",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python analytics/topsis_ers_calculator.py
+  python analytics/topsis_ers_calculator.py --preset telehealth --top 5
+  python analytics/topsis_ers_calculator.py --preset wellness --compare
+  python analytics/topsis_ers_calculator.py --preset tutoring --export results.csv
+        """,
+    )
+    parser.add_argument("--preset",  choices=list(PRESET_MAP.keys()), default="wellness",
+                        help="Industry weight preset (default: wellness)")
+    parser.add_argument("--top",     type=int, default=None,
+                        help="Show only top N experts")
+    parser.add_argument("--compare", action="store_true",
+                        help="Compare rankings across all presets")
+    parser.add_argument("--export",  type=str, default=None, metavar="FILE.csv",
+                        help="Export results to CSV")
+    parser.add_argument("--pool",    type=int, default=20, metavar="N",
+                        help="Synthetic expert pool size (default: 20)")
+    parser.add_argument("--gate",    type=float, default=0.65, metavar="THRESHOLD",
+                        help="AI training gate threshold (default: 0.65)")
 
-    engine = TopsisERS(COTO_WELLNESS_CRITERIA, min_sessions=5)
+    args = parser.parse_args()
+
+    rng     = np.random.default_rng(42)
+    experts = build_expert_pool(args.pool, rng)
+    criteria = PRESET_MAP[args.preset]
+    engine  = TopsisERS(criteria, min_sessions=5)
     results = engine.score(experts)
 
-    print("Expert Readiness Score (ERS) — Coto Wellness Preset\n")
-    print(f"{'Rank':<5} {'Name':<14} {'Category':<20} {'ERS':>6}  {'CSAT':>5}  {'Sessions':>8}  {'Retention':>10}  {'Resp Time':>10}  {'Cred':>5}")
-    print("-" * 94)
-    for r in results:
+    top_n = args.top or len(results)
+
+    label = args.preset.replace("_", " ").title()
+    print(f"\nExpert Readiness Score (ERS) — {label} Preset\n")
+    print(f"Criteria weights: {', '.join(f'{c.name}={c.weight:.0%}' for c in criteria)}\n")
+    print(f"{'Rank':<5} {'Name':<14} {'Category':<20} {'ERS':>6}  {'CSAT':>5}  {'Sessions':>8}  {'Retention':>10}  {'RespTime':>9}  {'Cred':>5}  {'AI Gate':>8}")
+    print("-" * 104)
+    for r in results[:top_n]:
         e = next(x for x in experts if x.id == r.expert_id)
+        gate_str = "PASS" if r.ers_score >= args.gate else "fail"
         print(f"{r.rank:<5} {r.expert_name:<14} {r.category:<20} {r.ers_score:>6.4f}  "
               f"{e.csat:>5.2f}  {e.session_count:>8}  {e.retention_rate:>9.1%}  "
-              f"{e.response_time:>9.1f}m  {e.credential_tier:>5}")
+              f"{e.response_time:>8.1f}m  {e.credential_tier:>5}  {gate_str:>8}")
 
-    print("\n--- Top Expert Breakdown ---")
-    top = results[0]
-    print(f"\nRank 1: {top.expert_name} (ERS = {top.ers_score})")
-    for cname, detail in top.breakdown.items():
-        print(f"  {cname:<16} raw={detail['raw']:<8}  norm={detail['normalised']:.4f}  "
-              f"weighted={detail['weighted']:.4f}  contribution={detail['contribution']}")
+    print(f"\nTop expert breakdown: {results[0].expert_name} (ERS = {results[0].ers_score})")
+    for cname, detail in results[0].breakdown.items():
+        bar = "█" * int(detail["weighted"] * 200)
+        print(f"  {cname:<18} raw={str(detail['raw']):<8} weighted={detail['weighted']:.4f}  {bar}")
 
-    # ERS threshold: conversations eligible for AI training
-    threshold = 0.65
-    eligible_for_ai = [r for r in results if r.ers_score >= threshold]
-    print(f"\nAI training gate (ERS ≥ {threshold}): {len(eligible_for_ai)}/{len(results)} experts qualify")
-    print("Their conversations may enter the Joy fine-tuning pipeline.")
+    eligible = [r for r in results if r.ers_score >= args.gate]
+    print(f"\nAI gate (ERS >= {args.gate}): {len(eligible)}/{len(results)} experts qualify  "
+          f"({len(eligible)/len(results):.0%} pass rate)")
 
-    # Preset comparison
-    print("\n--- Preset comparison (same expert pool) ---")
-    for label, criteria in [("Coto Wellness", COTO_WELLNESS_CRITERIA),
-                             ("Telehealth",    TELEHEALTH_CRITERIA),
-                             ("Tutoring",      TUTORING_CRITERIA)]:
-        eng = TopsisERS(criteria, min_sessions=5)
-        res = eng.score(experts)
-        top3 = [f"#{r.rank} {r.expert_name} ({r.ers_score:.3f})" for r in res[:3]]
-        print(f"  {label:<20}: {' | '.join(top3)}")
+    if args.compare:
+        compare_presets(experts)
+
+    if args.export:
+        export_to_csv(results, experts, args.export)
 
 
 if __name__ == "__main__":
