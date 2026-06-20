@@ -1414,7 +1414,7 @@ export default function Page() {
           {/* Narrative */}
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '32px 36px', marginBottom: 40, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: `linear-gradient(${VIOLET}, #06b6d4)` }} />
-            <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>The quality problem, circa 2024</div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>The quality problem at the outset</div>
             <p style={{ fontSize: '1rem', color: '#e2e8f0', lineHeight: 1.8, marginBottom: 16, fontStyle: 'italic' }}>
               The marketplace had hundreds of experts and no way to tell which ones were actually good.
             </p>

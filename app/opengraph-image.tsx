@@ -22,7 +22,7 @@ export default async function Image() {
     >
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(ellipse 70% 60% at 30% 50%, rgba(139,92,246,0.08), transparent)', display: 'flex' }} />
       <div style={{ fontSize: 13, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 28, display: 'flex' }}>
-        Project 6 - Coto, Singapore 2024
+        Project 6 - Expert Marketplace
       </div>
       <div style={{ fontSize: 72, fontWeight: 900, color: '#f8fafc', lineHeight: 1.1, marginBottom: 32, display: 'flex' }}>
         Rank, Reward, Retain
