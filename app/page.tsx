@@ -52,26 +52,41 @@ function SectionNav() {
 
 // ── SideNav (fixed right-side progress dots) ───────────────────────────────────
 function SideNav() {
+  const LABELS: Record<string, string> = Object.fromEntries(NAV_ITEMS.map((s) => [s.id, s.label]))
+  const prettify = (id: string) => id.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  const [items, setItems] = useState<{ id: string; label: string }[]>([])
   const [active, setActive] = useState('')
-  const [hov, setHov] = useState('')
   useEffect(() => {
+    const found: { id: string; label: string }[] = []
+    document.querySelectorAll<HTMLElement>('section[id]').forEach((sec) => {
+      if (sec.dataset.rail === 'skip') return
+      const h = sec.querySelector('h1, h2, h3')
+      const heading = (h?.textContent || '').replace(/\s+/g, ' ').trim()
+      const label = sec.dataset.rail || LABELS[sec.id] || heading || prettify(sec.id)
+      if (label) found.push({ id: sec.id, label })
+    })
+    setItems(found)
+    if (found[0]) setActive(found[0].id)
     const obs = new IntersectionObserver(
       (entries) => { for (const e of entries) if (e.isIntersecting) setActive(e.target.id) },
-      { rootMargin: '-40% 0px -55% 0px' }
+      { rootMargin: '-45% 0px -50% 0px' }
     )
-    NAV_ITEMS.forEach(({ id }) => { const el = document.getElementById(id); if (el) obs.observe(el) })
+    found.forEach((s) => { const el = document.getElementById(s.id); if (el) obs.observe(el) })
     return () => obs.disconnect()
   }, [])
+  if (items.length === 0) return null
   return (
-    <nav className="hidden xl:flex" style={{ position: 'fixed', right: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 50, flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-      {NAV_ITEMS.map(({ id, label }) => (
-        <a key={id} href={`#${id}`} title={label}
-          onMouseEnter={() => setHov(id)} onMouseLeave={() => setHov('')}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          {hov === id && <span style={{ fontSize: '0.68rem', color: VIOLET, whiteSpace: 'nowrap' }}>{label}</span>}
-          <div style={{ width: active === id ? 10 : 7, height: active === id ? 10 : 7, borderRadius: '50%', background: active === id ? VIOLET : 'rgba(255,255,255,0.2)', transition: 'all 0.2s' }} />
-        </a>
-      ))}
+    <nav aria-label="Section navigation" className="hidden xl:flex" style={{ position: 'fixed', right: 26, top: '50%', transform: 'translateY(-50%)', zIndex: 50, flexDirection: 'column', gap: 5, maxHeight: '86vh', overflowY: 'auto' }}>
+      {items.map((s) => {
+        const on = active === s.id
+        return (
+          <a key={s.id} href={`#${s.id}`} aria-current={on ? 'true' : undefined}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, textDecoration: 'none', padding: '3px 0' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: on ? 700 : 500, color: on ? VIOLET : '#475569', whiteSpace: 'nowrap', transition: 'color .2s' }}>{s.label}</span>
+            <span style={{ width: on ? 24 : 12, height: 3, borderRadius: 2, background: on ? VIOLET : 'rgba(255,255,255,0.2)', transition: 'all .2s', flexShrink: 0 }} />
+          </a>
+        )
+      })}
     </nav>
   )
 }
@@ -1712,15 +1727,27 @@ export default function Page() {
       </section>
 
       {/* ── Footer ── */}
-      <footer style={{ padding: '48px 32px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '40px 32px 56px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>Wahid Tawsif Ratul</div>
-            <div style={{ fontSize: '0.72rem', color: '#475569' }}>Data Scientist · Product Manager</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 5 }}>Wahid Tawsif Ratul</div>
+            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>© 2026 · Data Scientist · Product Manager</div>
           </div>
-          <div style={{ display: 'flex', gap: 20 }}>
-            <a href="https://github.com/ratul003/rank-reward-retain" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.78rem', color: '#64748b', textDecoration: 'none' }}>GitHub</a>
-            <a href="https://www.linkedin.com/in/wahidtratul/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.78rem', color: '#64748b', textDecoration: 'none' }}>LinkedIn</a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            {[
+              { label: 'LinkedIn', href: 'https://linkedin.com/in/wahidratul112296', path: 'M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.64h.05c.53-1 1.83-2.05 3.77-2.05C20.5 8.59 22 11 22 14.4V21h-4v-5.86c0-1.4-.03-3.2-1.95-3.2-1.95 0-2.25 1.52-2.25 3.1V21H9z' },
+              { label: 'GitHub', href: 'https://github.com/ratul003', path: 'M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z' },
+              { label: 'Medium', href: 'https://medium.com/@wahidtratul', path: 'M2.5 5.5l1.7 2v9.7l-2 2.3h5.4l-2-2.3V8.4l4.9 11.1h.1l4.3-10.5v8.2l-1.3 1.3v.2h6.4v-.2l-1.3-1.3V6.9l1.3-1.3v-.1h-4.5L13 13.9 9.3 5.5z' },
+              { label: 'Email', href: 'mailto:wahidtratul@gmail.com', path: '' },
+            ].map((s) => (
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} style={{ color: '#64748b', display: 'inline-flex' }}>
+                {s.label === 'Email' ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d={s.path} /></svg>
+                )}
+              </a>
+            ))}
           </div>
         </div>
       </footer>
