@@ -1198,7 +1198,7 @@ function TopsisFormulas() {
       id: 'ideal',
       label: '3  Ideal',
       formula: <span style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><span>A<sup>+</sup> = max(v<sub>ij</sub>) <span style={{ fontSize: '0.78em', color: '#64748b', marginLeft: 4 }}>benefit criteria</span></span><span>A<sup>−</sup> = min(v<sub>ij</sub>) <span style={{ fontSize: '0.78em', color: '#64748b', marginLeft: 4 }}>cost criteria</span></span></span>,
-      note: 'Positive ideal A⁺ is the best value per criterion across all experts. Response Time flips — lower is better (cost criterion).',
+      note: 'Positive ideal A⁺ is the best value per criterion across all experts. Response Time flips: lower is better (cost criterion).',
       calc: `CSAT column values: [${V.map(r => r[0].toFixed(4)).join(', ')}]`,
       calcVal: `A⁺ (CSAT) = max = ${Apos[0].toFixed(4)}  |  A⁺ (Resp. Time) = min = ${Apos[3].toFixed(4)}`,
       result: `A⁺ = [${Apos.map(v => v.toFixed(4)).join(', ')}]`,
@@ -1219,7 +1219,7 @@ function TopsisFormulas() {
       note: 'Relative closeness to ideal. ERS = 1.0 means perfect across all criteria simultaneously. Threshold 0.65 gates AI training eligibility.',
       calc: `Alex ERS = ${dNeg[0].toFixed(4)} / (${dPos[0].toFixed(4)} + ${dNeg[0].toFixed(4)})`,
       calcVal: `= ${dNeg[0].toFixed(4)} / ${(dPos[0]+dNeg[0]).toFixed(4)} = ${ers[0].toFixed(4)}`,
-      result: `ERS ${ers[0].toFixed(4)} ${ers[0] >= 0.65 ? '≥ 0.65 — AI training eligible' : '< 0.65 — below threshold'}`,
+      result: `ERS ${ers[0].toFixed(4)} ${ers[0] >= 0.65 ? '≥ 0.65: AI training eligible' : '< 0.65: below threshold'}`,
     },
   ]
 
@@ -1279,7 +1279,7 @@ function ERSBarChart() {
         ERS scores · all 5 experts, AI threshold at 0.65
       </div>
       <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5, marginBottom: 20, maxWidth: 560 }}>
-        Purple bars pass the AI training gate (ERS &ge; 0.65). Red bars fall below. Hover to inspect. Casey ranks last despite 178 sessions — CSAT 3.4 and 44% retention are what the algorithm sees, regardless of volume.
+        Purple bars pass the AI training gate (ERS &ge; 0.65). Red bars fall below. Hover to inspect. Casey ranks last despite 178 sessions: CSAT 3.4 and 44% retention are what the algorithm sees, regardless of volume.
       </p>
       <svg width={svgW} height={svgH} style={{ overflow: 'visible', fontFamily: 'inherit' }}>
         {/* Y gridlines */}
@@ -1363,7 +1363,7 @@ export default function Page() {
             Rank, Reward, Retain
           </h1>
           <p style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: '#94a3b8', lineHeight: 1.75, maxWidth: 680, marginBottom: 48 }}>
-            I built the scoring engine, the revenue model, and the analytics layer for an expert marketplace that had none of the three. The TOPSIS engine ranks counselors, coaches, and therapists across five quality signals — not a weighted average, which is gameable, but a geometric distance from the best and worst possible profiles simultaneously. The revenue framework turns that score into real financial incentives: tier progression, session bonuses, and earnings transparency. All three systems shipped before there was an engineering team to hand them off to.
+            I built the scoring engine, the revenue model, and the analytics layer for an expert marketplace that had none of the three. The TOPSIS engine ranks counselors, coaches, and therapists across five quality signals, not a weighted average, which is gameable, but a geometric distance from the best and worst possible profiles simultaneously. The revenue framework turns that score into real financial incentives: tier progression, session bonuses, and earnings transparency. All three systems shipped before there was an engineering team to hand them off to.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 24, maxWidth: 680, marginBottom: 48 }}>
             <AnimatedMetric value="23%"  label="Quality improvement"    note="after ERS implementation" />
@@ -1453,7 +1453,7 @@ export default function Page() {
           <QualityImprovementChart />
 
           <div style={{ marginTop: 28, padding: '18px 22px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}18`, borderRadius: 12 }}>
-            <div style={{ fontSize: '0.68rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Design decision: not a black box</div>
+            <div style={{ fontSize: '0.68rem', color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Design decision, not a black box</div>
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>
               Every ERS output includes a per-criterion breakdown. Operators can see exactly why Expert A outranks Expert B and which criterion is the gap. That interpretability matters: a score that ops can&apos;t explain cannot drive decisions about routing, training, or compensation.
             </p>
