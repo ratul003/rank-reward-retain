@@ -197,7 +197,7 @@ from typing import Optional
 def main() -> None:
     sim = CreatorAnalyticsSimulator(n_experts=50, n_weeks=12)
 
-    print("Creator Analytics Framework — Coto Wellness (Synthetic Data)\n")
+    print("Creator Analytics Framework — Wellness (Synthetic Data)\n")
 
     # Module 1: Creator Performance
     perf = sim.generate_creator_performance()

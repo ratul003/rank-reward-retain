@@ -1,8 +1,8 @@
 # Rank, Reward, Retain
 
-**Portfolio Project 6** — Expert scoring, compensation design, and retention framework built for [Coto](https://coto.world) (Singapore, 2024).
+**Portfolio Project 6** — Expert scoring, compensation design, and retention framework built for an on-demand expert marketplace.
 
-> Coto had experts but no intelligence about them. I built the full supply intelligence layer from scratch: a TOPSIS scoring system, a dynamic revenue framework, and a creator analytics dashboard — all delivered before the engineering team had capacity to ship anything.
+> The marketplace had experts but no intelligence about them. I built the full supply intelligence layer from scratch: a TOPSIS scoring system, a dynamic revenue framework, and a creator analytics dashboard — all delivered before the engineering team had capacity to ship anything.
 
 **Live demo:** https://rank-reward-retain.vercel.app  
 **Companion project (P5):** https://when-demand-exceeds-supply.vercel.app
@@ -61,14 +61,14 @@ Delivered as a working Google Sheets dashboard (3 tabs) before any analytics eng
 
 ## ERS → AI Training Pipeline
 
-The ERS score became the quality gate for Joy's training data:
+The ERS score became the quality gate for the AI companion's training data:
 
 - ERS ≥ 0.65 (expert quality threshold)
 - Session health ≥ 0.60 (resolution + sentiment arc composite)
 - Minimum 5 exchanges per conversation
 - Positive customer sentiment arc
 
-49.6% pass rate, by design. 248 high-quality pairs beat 500 mediocre ones. Joy (Coto's AI companion trained on 3M+ consultations) reflects this filtering.
+49.6% pass rate, by design. 248 high-quality pairs beat 500 mediocre ones. The AI companion (trained on 3M+ consultations) reflects this filtering.
 
 ### Conversation Intelligence signals extracted per session
 
@@ -89,7 +89,7 @@ Output: OpenAI fine-tuning JSONL, HuggingFace datasets, Axolotl / LLaMA-Factory 
 
 | Script | Description |
 |--------|-------------|
-| `analytics/topsis_ers_calculator.py` | Full TOPSIS algorithm, configurable per preset (Coto wellness, telehealth, tutoring) |
+| `analytics/topsis_ers_calculator.py` | Full TOPSIS algorithm, configurable per preset (wellness, telehealth, tutoring) |
 | `analytics/revenue_share_model.py` | Multi-factor revenue share calculator with cohort simulation |
 | `analytics/creator_analytics.py` | Creator performance, session, and conversion funnel metrics with WoW/MoM deltas |
 | `analytics/ai_pipeline.py` | Conversation intelligence, ERS quality gate, fine-tuning dataset builder |
@@ -109,7 +109,7 @@ python analytics/ai_pipeline.py
 - **23%** increase in expert quality ratings after TOPSIS scoring implementation
 - **95%** supply retention from the dynamic revenue optimization framework
 - **300+** verified experts onboarded across 5 wellness categories
-- **3M+** consultations now served via Joy AI, trained on quality-gated expert conversations
+- **3M+** consultations now served via the AI companion, trained on quality-gated expert conversations
 
 ---
 

@@ -23,7 +23,7 @@ const NAV_ITEMS = [
   { id: 'rank',     label: 'Rank' },
   { id: 'reward',   label: 'Reward' },
   { id: 'retain',   label: 'Retain' },
-  { id: 'joy',      label: 'AI Agent' },
+  { id: 'ai-companion', label: 'AI Companion' },
   { id: 'outcomes', label: 'Outcomes' },
 ]
 
@@ -637,7 +637,7 @@ function AIQualityGate() {
       <div style={{ marginTop: 20, padding: '14px 16px', background: `${VIOLET}08`, border: `1px solid ${VIOLET}20`, borderRadius: 10 }}>
         <div style={{ fontSize: '0.8rem', color: VIOLET, fontWeight: 700, marginBottom: 4 }}>49.6% pass rate, by design</div>
         <p style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
-          The gate is deliberately strict. One low-quality expert conversation in the training set degrades the AI agent for future users who encounter it. 248 high-quality pairs beat 500 mediocre ones, and the ERS score is what makes the gate principled rather than arbitrary.
+          The gate is deliberately strict. One low-quality expert conversation in the training set degrades the AI companion for future users who encounter it. 248 high-quality pairs beat 500 mediocre ones, and the ERS score is what makes the gate principled rather than arbitrary.
         </p>
       </div>
     </div>
@@ -913,8 +913,8 @@ const BRIDGE_FLOWS = [
     desc: 'During a Yellow or Red state, the incentive push goes to high-ERS experts first. They respond at 55% vs 30% for low-ERS experts - already invested, already accountable.' },
   { from: 'Barometer Data (When Demand Exceeds Supply)', to: 'D&S Analytics Tab (Rank, Reward, Retain)',  color: '#06b6d4', icon: '📊', dir: 'left',
     desc: 'The Demand and Supply tab in the creator dashboard pulls live barometer signals. An expert can see whether their category is Green, Yellow, or Red and adjust availability accordingly.' },
-  { from: 'Expert Sessions',     to: 'AI Agent Training',          color: '#22c55e', icon: '🤖', dir: 'right',
-    desc: 'Only conversations from experts above ERS 0.65 enter the fine-tuning pipeline. Low-quality conversations are excluded before they can degrade the AI agent for future users.' },
+  { from: 'Expert Sessions',     to: 'AI Companion Training',          color: '#22c55e', icon: '🤖', dir: 'right',
+    desc: 'Only conversations from experts above ERS 0.65 enter the fine-tuning pipeline. Low-quality conversations are excluded before they can degrade the AI companion for future users.' },
   { from: 'Surge Revenue (When Demand Exceeds Supply)',  to: 'Revenue Analytics (Rank, Reward, Retain)',   color: '#f59e0b', icon: '💰', dir: 'left',
     desc: 'Surge fees from Yellow or Red states appear in the Revenue tab as Surge Revenue and Expert Incentivized Revenue metrics, closing the loop for operators.' },
 ]
@@ -1369,7 +1369,7 @@ export default function Page() {
             <AnimatedMetric value="23%"  label="Quality improvement"    note="after ERS implementation" />
             <AnimatedMetric value="95%"  label="Supply retention"        note="from revenue framework" />
             <AnimatedMetric value="300+" label="Verified experts"         note="across 5 categories" />
-            <AnimatedMetric value="3M+"  label="AI agent consultations"   note="quality-gated by ERS" />
+            <AnimatedMetric value="3M+"  label="AI companion consultations"   note="quality-gated by ERS" />
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {['Python · NumPy · SciPy', 'TOPSIS MCDA', 'Google Sheets', 'dbt · PostgreSQL', 'NLP Pipeline', 'Segment-compatible events'].map(tag => (
@@ -1562,8 +1562,8 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ── Ch04: Joy ── */}
-      <section id="joy" style={{ padding: '0 32px 100px' }}>
+      {/* ── Ch04: AI Companion ── */}
+      <section id="ai-companion" style={{ padding: '0 32px 100px' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${VIOLET}10`, border: `1px solid ${VIOLET}25`, borderRadius: 6, padding: '4px 10px', marginBottom: 20 }}>
             <span style={{ fontSize: '0.68rem', color: VIOLET, fontWeight: 700, letterSpacing: '0.1em' }}>CH04</span>
@@ -1615,7 +1615,7 @@ export default function Page() {
           <div style={{ marginTop: 28, padding: '20px 24px', background: `${VIOLET}06`, border: `1px solid ${VIOLET}22`, borderRadius: 12 }}>
             <div style={{ fontWeight: 700, color: VIOLET, fontSize: '0.9rem', marginBottom: 8 }}>The two projects are one system</div>
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>
-              <a href="https://when-demand-exceeds-supply.vercel.app" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: 600 }}>When Demand Exceeds Supply</a> handles real-time routing: during a Yellow state, high-ERS experts receive the incentive push first. <a href="https://rank-reward-retain.vercel.app" style={{ color: VIOLET, textDecoration: 'none', fontWeight: 600 }}>Rank, Reward, Retain</a> generates those ERS scores. The AI agent then learns from the conversations those high-ERS experts have. The scoring system, the ops layer, and the AI companion are the same pipeline seen from three different vantage points.
+              <a href="https://when-demand-exceeds-supply.vercel.app" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: 600 }}>When Demand Exceeds Supply</a> handles real-time routing: during a Yellow state, high-ERS experts receive the incentive push first. <a href="https://rank-reward-retain.vercel.app" style={{ color: VIOLET, textDecoration: 'none', fontWeight: 600 }}>Rank, Reward, Retain</a> generates those ERS scores. The AI companion then learns from the conversations those high-ERS experts have. The scoring system, the ops layer, and the AI companion are the same pipeline seen from three different vantage points.
             </p>
           </div>
         </div>
@@ -1634,7 +1634,7 @@ export default function Page() {
               { metric: '23%',  label: 'Expert quality rating improvement', note: 'After TOPSIS ERS replaced ad-hoc manual review, 23% lift in average quality ratings across the platform.' },
               { metric: '95%',  label: 'Supply retention rate',              note: 'The dynamic revenue framework produced 95% expert retention, well above the 60-70% industry norm.' },
               { metric: '300+', label: 'Verified experts onboarded',          note: 'Across five wellness categories, all scored, compensated, and tracked via the framework.' },
-              { metric: '3M+',  label: 'AI agent consultations',               note: 'The AI agent was trained on quality-gated expert conversations, the direct downstream of the ERS system.' },
+              { metric: '3M+',  label: 'AI companion consultations',               note: 'The AI companion was trained on quality-gated expert conversations, the direct downstream of the ERS system.' },
             ].map(m => (
               <div key={m.metric} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${VIOLET}15`, borderRadius: 16, padding: '28px' }}>
                 <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: VIOLET, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 10 }}>{m.metric}</div>

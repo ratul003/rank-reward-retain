@@ -20,7 +20,7 @@ Usage:
     python analytics/topsis_ers_calculator.py --preset tutoring --export results.csv
 
 Presets:
-    wellness   - Coto wellness platform (CSAT + volume + retention + speed + credential)
+    wellness   - wellness marketplace (CSAT + volume + retention + speed + credential)
     telehealth - Medical/clinical (credential tier dominates; volume secondary)
     tutoring   - EdTech (retention dominates; students coming back = quality signal)
     freelance  - Fiverr-type (response time dominates; credential barely matters)
@@ -74,9 +74,9 @@ class ERSResult:
     breakdown: dict[str, dict]
 
 
-# ── Canonical criteria config (Coto wellness default) ─────────────────────────
+# ── Canonical criteria config (wellness default) ─────────────────────────
 
-COTO_WELLNESS_CRITERIA: list[Criterion] = [
+WELLNESS_CRITERIA: list[Criterion] = [
     Criterion("csat",           CriterionType.BENEFIT, 0.30),
     Criterion("session_count",  CriterionType.BENEFIT, 0.25),
     Criterion("retention_rate", CriterionType.BENEFIT, 0.20),
@@ -109,7 +109,7 @@ FREELANCE_CRITERIA: list[Criterion] = [
 ]
 
 PRESET_MAP = {
-    "wellness":  COTO_WELLNESS_CRITERIA,
+    "wellness":  WELLNESS_CRITERIA,
     "telehealth": TELEHEALTH_CRITERIA,
     "tutoring":  TUTORING_CRITERIA,
     "freelance": FREELANCE_CRITERIA,

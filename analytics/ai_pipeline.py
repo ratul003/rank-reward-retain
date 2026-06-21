@@ -3,7 +3,7 @@ ai_pipeline.py
 
 Conversation intelligence and AI training data pipeline for the Rank, Reward, Retain
 framework. Demonstrates the quality gate that determined which expert conversations
-entered Joy's fine-tuning dataset — ERS threshold + session health score.
+entered the AI companion's fine-tuning dataset — ERS threshold + session health score.
 
 Pipeline stages:
   1. Conversation Intelligence Layer — extract signals from session transcripts
@@ -11,7 +11,7 @@ Pipeline stages:
   3. AI Dataset Builder — format as instruction fine-tuning pairs (OpenAI-compatible)
   4. System prompt generator — per-category system prompts for the fine-tuned model
 
-This is the methodology behind Coto's Joy AI companion (3M+ consultations, trained
+This is the methodology behind an AI companion (3M+ consultations, trained
 on real expert conversations quality-gated by the ERS system).
 
 Usage:
@@ -243,7 +243,7 @@ def main() -> None:
     intel = ConversationIntelligence(rng)
     categories = ["astrology", "mental_health", "relationship", "financial_coaching", "reproductive"]
 
-    print("AI Training Pipeline — Coto Wellness (Simulated)\n")
+    print("AI Training Pipeline — Wellness (Simulated)\n")
 
     # Simulate 500 conversations from experts with varying ERS
     signals = []
