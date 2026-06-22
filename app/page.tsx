@@ -563,7 +563,7 @@ function CreatorMetricGrid() {
 
   return (
     <div style={{ marginTop: 28 }}>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
         {CREATOR_METRICS.map(m => {
           const on = active === m.module
           return (
