@@ -1077,6 +1077,7 @@ function ExpertScatterPlot() {
         Hover any expert. Sam has the highest session count, but ERS sits mid-table. Low CSAT and retention drag her score down despite the volume signal.
       </p>
       <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
         <svg width={W} height={H} style={{ overflow: 'visible', fontFamily: 'inherit', flexShrink: 0 }}>
           <g stroke="rgba(255,255,255,0.04)" strokeWidth="1">
             {[0, 0.33, 0.67, 1].map(t => (
@@ -1116,6 +1117,7 @@ function ExpertScatterPlot() {
             <text x={-8} y={18} textAnchor="end" fill="#ef4444" fontSize="8">ERS &lt; 0.65</text>
           </g>
         </svg>
+        </div>
         <div style={{ flex: 1, minWidth: 180 }}>
           {expert ? (
             <div style={{ padding: '16px 18px', background: `${VIOLET}08`, border: `1px solid ${VIOLET}22`, borderRadius: 12 }}>
@@ -1281,6 +1283,7 @@ function ERSBarChart() {
       <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5, marginBottom: 20, maxWidth: 560 }}>
         Purple bars pass the AI training gate (ERS &ge; 0.65). Red bars fall below. Hover to inspect. Casey ranks last despite 178 sessions: CSAT 3.4 and 44% retention are what the algorithm sees, regardless of volume.
       </p>
+      <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
       <svg width={svgW} height={svgH} style={{ overflow: 'visible', fontFamily: 'inherit' }}>
         {/* Y gridlines */}
         {[0, 0.25, 0.5, 0.65, 0.75, 1.0].map(v => {
@@ -1324,6 +1327,7 @@ function ERSBarChart() {
           )
         })}
       </svg>
+      </div>
       {hov !== null && (
         <div style={{ marginTop: 10, padding: '10px 16px', background: `${ranked[hov].ers >= 0.65 ? VIOLET : '#ef4444'}08`, border: `1px solid ${ranked[hov].ers >= 0.65 ? VIOLET : '#ef4444'}25`, borderRadius: 8, fontSize: '0.78rem', color: '#94a3b8' }}>
           <span style={{ color: ranked[hov].ers >= 0.65 ? VIOLET : '#ef4444', fontWeight: 700 }}>{ranked[hov].name}</span>

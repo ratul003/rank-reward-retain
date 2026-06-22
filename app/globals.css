@@ -27,3 +27,17 @@ input[type="range"] {
   height: 4px;
   border-radius: 2px;
 }
+
+/* Responsive containment: never let the page scroll sideways on phones.
+   Wide content scrolls inside its own container instead. */
+table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
