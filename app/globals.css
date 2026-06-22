@@ -41,3 +41,13 @@ pre {
   max-width: 100%;
   overflow-x: auto;
 }
+
+/* Sticky top-nav links scroll horizontally inside the nav on small screens
+   instead of pushing the whole page. Scrollbar hidden for a clean look. */
+.rrr-navlinks {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+.rrr-navlinks::-webkit-scrollbar {
+  display: none;            /* Chrome/Safari */
+}

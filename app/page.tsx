@@ -32,13 +32,13 @@ function SectionNav() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
   return (
-    <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,10,15,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 32px' }}>
-      <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 52 }}>
-        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: VIOLET, letterSpacing: '0.05em' }}>RANK · REWARD · RETAIN</span>
-        <div style={{ display: 'flex', gap: 4 }}>
+    <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,10,15,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 32px', maxWidth: '100%' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 52, minWidth: 0 }}>
+        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: VIOLET, letterSpacing: '0.05em', flexShrink: 0 }}>RANK · REWARD · RETAIN</span>
+        <div className="rrr-navlinks" style={{ display: 'flex', flexWrap: 'nowrap', whiteSpace: 'nowrap', gap: 4, minWidth: 0, overflowX: 'auto' }}>
           {NAV_ITEMS.map(n => (
             <button key={n.id} onClick={() => scrollTo(n.id)}
-              style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: 'transparent', color: '#64748b', fontSize: '0.78rem', cursor: 'pointer', transition: 'color 0.15s' }}
+              style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: 'transparent', color: '#64748b', fontSize: '0.78rem', cursor: 'pointer', transition: 'color 0.15s', flexShrink: 0 }}
               onMouseEnter={e => (e.currentTarget.style.color = VIOLET)}
               onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}>
               {n.label}
